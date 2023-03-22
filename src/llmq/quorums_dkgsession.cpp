@@ -908,7 +908,7 @@ void CDKGSession::SendCommitment(CDKGPendingMessages& pendingMessages)
     }
 
     if (qc.CountValidMembers() < params.minSize) {
-        logger.Batch("not enough valid members. not sending commitment");
+        logger.Batch("not enough valid members (valid=%d, min=%d, members=%d). not sending commitment", qc.CountValidMembers(), params.minSize, members.size());
         return;
     }
 

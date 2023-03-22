@@ -813,6 +813,21 @@ bool CDeterministicMNManager::BuildNewListFromBlock(const CBlock& block, const C
             if (!GetTxPayload(tx, qc)) {
                 assert(false); // this should have been handled already
             }
+
+            if (debugLogs) {
+                bool qpkValid = qc.commitment.quorumPublicKey.IsValid();
+                bool qvvcNull = qc.commitment.quorumVvecHash.IsNull();
+                bool msValid = qc.commitment.membersSig.IsValid();
+                bool qsValid = qc.commitment.quorumSig.IsValid();
+                int cSigners = qc.commitment.CountSigners();
+                int vMembers = qc.commitment.CountValidMembers();
+                LogPrintf("CDeterministicMNManager::%s -- Log commitment: %s, %s, %s, %s, %s, %s - %d,%d,%d,%d,%d,%d \n",
+                    __func__, tx.GetHash().ToString(), qc.commitment.quorumHash.ToString(), 
+                    qc.commitment.quorumPublicKey.ToString(), qc.commitment.quorumVvecHash.ToString(), 
+                    qc.commitment.membersSig.ToString(), qc.commitment.quorumSig.ToString(), 
+                    qpkValid, qvvcNull, msValid, qsValid, cSigners, vMembers);
+            }
+
             if (!qc.commitment.IsNull()) {
                 const auto& params = Params().GetConsensus().llmqs.at(qc.commitment.llmqType);
                 int quorumHeight = qc.nHeight - (qc.nHeight % params.dkgInterval);

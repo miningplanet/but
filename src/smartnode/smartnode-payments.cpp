@@ -365,7 +365,7 @@ bool CSmartnodePayments::IsTransactionValid(const CTransaction& txNew, int nBloc
 
     std::vector<CTxOut> voutSmartnodePayments;
     if (!GetBlockTxOuts(nBlockHeight, blockReward, voutSmartnodePayments)) {
-        LogPrintf("CSmartnodePayments::%s -- ERROR failed to get payees for block at height %s\n", __func__, nBlockHeight);
+        LogPrintf("CSmartnodePayments::%s -- WARN failed to get payees for block at height %s\n", __func__, nBlockHeight);
         return true;
     }
 

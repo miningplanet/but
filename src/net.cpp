@@ -1151,7 +1151,7 @@ void CConnman::AcceptConnection(const ListenSocket& hListenSocket) {
 
     if (IsBanned(addr) && !whitelisted)
     {
-        LogPrintf("%s (banned)\n", strDropped);
+        LogPrintf("%s %s (banned)\n", addr.ToStringIPPort(false), strDropped);
         CloseSocket(hSocket);
         return;
     }
@@ -1483,7 +1483,7 @@ void CConnman::ThreadSocketHandler()
                     if (nErr != WSAEWOULDBLOCK && nErr != WSAEMSGSIZE && nErr != WSAEINTR && nErr != WSAEINPROGRESS)
                     {
                         if (!pnode->fDisconnect)
-                            LogPrintf("socket recv error %s\n", NetworkErrorString(nErr));
+                            LogPrintf("socket recv error %s %s\n", pnode->addr.ToStringIPPort(), NetworkErrorString(nErr));
                         pnode->CloseSocketDisconnect();
                     }
                 }
