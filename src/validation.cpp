@@ -1056,9 +1056,10 @@ CAmount GetBlockSubsidy(int nPrevBits, int nPrevHeight, const Consensus::Params&
 
 CAmount GetSmartnodePayment(int nHeight, CAmount blockValue)
 {
-	size_t mnCount = chainActive.Tip() == nullptr ? 0 : deterministicMNManager->GetListForBlock(chainActive.Tip()).GetAllMNsCount();
-	if(mnCount >= 10) {
-		int percentage = Params().GetConsensus().nCollaterals.getRewardPercentage(nHeight);
+	size_t mnCount = chainActive.Tip() == nullptr ? 0 : deterministicMNManager->GetListForBlock(chainActive.Tip()).GetAllMNsCount();    
+	if(mnCount >= 2) {
+        int percentage = Params().GetConsensus().nCollaterals.getRewardPercentage(nHeight);
+        LogPrintf("%s: INFO: Get payees for block at height %d, number of nodes %d, value %d, percent %d.\n", __func__, nHeight, mnCount, blockValue, percentage);
 		return blockValue * percentage / 100;
 	} else {
 		return 0;
