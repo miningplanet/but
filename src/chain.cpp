@@ -125,27 +125,9 @@ arith_uint256 GetBlockProof(const CBlockIndex& block)
     // Compute the geometric mean of the block targets for each individual algorithm.
     arith_uint256 bnAvgTarget(1);
 
-    int CURRENT_ALGOS;
-
-    if (block.nHeight >= params.nSwitchHeight)
+    for (int i = 0; i < NUM_ALGOS; i++)
     {
-        CURRENT_ALGOS = NUM_ALGOSV4;
-    }
-    else if (block.nHeight >= params.AlgoChangeHeight)
-    {
-        CURRENT_ALGOS = NUM_ALGOSV3;
-    }
-    else if (block.nHeight >= params.v2DiffChangeHeight)
-    {
-        CURRENT_ALGOS = NUM_ALGOSV2;
-    }
-    else
-    {
-        CURRENT_ALGOS = NUM_ALGOS;
-    }
-    for (int i = 0; i < CURRENT_ALGOS; i++)
-    {
-        unsigned int nBits = GetNextWorkRequired(block.pprev, &header, params, i);
+        unsigned int nBits = GetNextWorkRequired(block.pprev, params, i);
         arith_uint256 bnTarget;
         bool fNegative;
         bool fOverflow;
@@ -155,7 +137,7 @@ arith_uint256 GetBlockProof(const CBlockIndex& block)
         // Instead of multiplying them all together and then taking the
         // nth root at the end, take the roots individually then multiply so
         // that all intermediate values fit in 256-bit integers.
-        bnAvgTarget *= bnTarget.ApproxNthRoot(CURRENT_ALGOS);
+        bnAvgTarget *= bnTarget.ApproxNthRoot(NUM_ALGOS);
     }
 
     arith_uint256 bnRes = (~bnAvgTarget / (bnAvgTarget + 1)) + 1;

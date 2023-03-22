@@ -1718,22 +1718,13 @@ int32_t ComputeBlockVersion(const CBlockIndex* pindexPrev, const Consensus::Para
         nVersion |= BLOCK_VERSION_GHOSTRIDER;
         break;
         case ALGO_YESPOWER:
-        if (pindexPrev->nHeight < params.v2DiffChangeHeight)
-            nVersion |= BLOCK_VERSION_BUTKSCRYPT;
-        else
-            nVersion |= BLOCK_VERSION_YESPOWER;
+        nVersion |= BLOCK_VERSION_YESPOWER;
         break;
         case ALGO_LYRA2:
-        if (pindexPrev->nHeight < params.AlgoChangeHeight)
-            nVersion |= BLOCK_VERSION_BUTKSCRYPT;
-        else
-            nVersion |= BLOCK_VERSION_LYRA2;
+        nVersion |= BLOCK_VERSION_LYRA2;
 		break;
         case ALGO_SCRYPT:
-        if (pindexPrev->nHeight < params.nSwitchHeight)
-            nVersion |= BLOCK_VERSION_BUTKSCRYPT;
-        else
-            nVersion |= BLOCK_VERSION_SCRYPT;
+        nVersion |= BLOCK_VERSION_SCRYPT;
         break;
         default:
         break;
@@ -3285,7 +3276,7 @@ static bool ContextualCheckBlockHeader(const CBlockHeader& block, CValidationSta
 
     // Check proof of work
     const Consensus::Params& consensusParams = params.GetConsensus();
-        if (block.nBits != GetNextWorkRequired(pindexPrev, &block, consensusParams, block.GetAlgo()))
+        if (block.nBits != GetNextWorkRequired(pindexPrev, consensusParams, block.GetAlgo()))
             return state.DoS(100, false, REJECT_INVALID, "bad-diffbits", false, strprintf("incorrect proof of work at %d", nHeight));
 
     // Check against checkpoints

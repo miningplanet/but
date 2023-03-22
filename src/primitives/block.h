@@ -20,24 +20,22 @@ enum
     ALGO_SCRYPT      = 5
 };
 
-const int NUM_ALGOS   = 3;
-const int NUM_ALGOSV2 = 4;
-const int NUM_ALGOSV3 = 5;
-const int NUM_ALGOSV4 = 6;
+const int NUM_ALGOS   = 6;
+
 enum
 {
     // primary version
 BLOCK_VERSION_DEFAULT = 2,
 
     // algo
-    BLOCK_VERSION_ALGO_BROKEN    = (10 << 11), //'101000000000000' 10 (broken bitmask)
-    BLOCK_VERSION_ALGO           = (15 << 11), //'111100000000000' 15 (bitmask)
-    BLOCK_VERSION_BUTKSCRYPT     = (1  << 11), //'000100000000000' 1
-    BLOCK_VERSION_SHA256D        = (2  << 11), //'001000000000000' 2
-    BLOCK_VERSION_GHOSTRIDER     = (3  << 11), //'001100000000000' 3
-    BLOCK_VERSION_YESPOWER 	 = (4  << 11), //'010000000000000' 4
-    BLOCK_VERSION_LYRA2 	 = (10 << 11), //'101000000000000' 10
-    BLOCK_VERSION_SCRYPT         = (5  << 11),
+    BLOCK_VERSION_ALGO_BROKEN       = (10 << 11), //'101000000000000' 10 (broken bitmask)
+    BLOCK_VERSION_ALGO              = (15 << 11), //'111100000000000' 15 (bitmask)
+    BLOCK_VERSION_BUTKSCRYPT        = (1  << 11), //'000100000000000' 1
+    BLOCK_VERSION_SHA256D           = (2  << 11), //'001000000000000' 2
+    BLOCK_VERSION_GHOSTRIDER        = (3  << 11), //'001100000000000' 3
+    BLOCK_VERSION_YESPOWER 	        = (4  << 11), //'010000000000000' 4
+    BLOCK_VERSION_LYRA2 	        = (10 << 11), //'101000000000000' 10
+    BLOCK_VERSION_SCRYPT            = (5  << 11),
 };
 
 static inline int GetAlgoByName(std::string strAlgo){
