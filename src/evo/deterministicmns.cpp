@@ -809,11 +809,34 @@ bool CDeterministicMNManager::BuildNewListFromBlock(const CBlock& block, const C
                     __func__, proTx.proTxHash.ToString(), nHeight, proTx.ToString());
             }
         } else if (tx.nType == TRANSACTION_QUORUM_COMMITMENT) {
+            if (debugLogs) {
+                LogPrintf("CDeterministicMNManager::%s -- TRANSACTION_QUORUM_COMMITMENT at height %d.\n", __func__, nHeight);
+            }
             llmq::CFinalCommitmentTxPayload qc;
             if (!GetTxPayload(tx, qc)) {
+                if (debugLogs) {
+                    LogPrintf("CDeterministicMNManager::%s -- TRANSACTION_QUORUM_COMMITMENT but no payload at height %d.\n", __func__, nHeight);
+                }
                 assert(false); // this should have been handled already
             }
+
+            bool qpkValid = qc.commitment.quorumPublicKey.IsValid();
+            bool qvvcNull = qc.commitment.quorumVvecHash.IsNull();
+            bool msValid = qc.commitment.membersSig.IsValid();
+            bool qsValid = qc.commitment.quorumSig.IsValid();
+            int cSigners = qc.commitment.CountSigners();
+            int vMembers = qc.commitment.CountValidMembers();
+
+            if (debugLogs) {
+                LogPrintf("CDeterministicMNManager::%s -- Log commitment: %s, %s, %s, %s, %s, %s - %d,%d,%d,%d,%d,%d \n",
+                    __func__, tx.GetHash().ToString(), qc.commitment.quorumHash.ToString(), qc.commitment.quorumPublicKey.ToString(), qc.commitment.quorumVvecHash.ToString(), 
+                    qc.commitment.membersSig.ToString(), qc.commitment.quorumSig.ToString(), qpkValid, qvvcNull, msValid, qsValid, cSigners, vMembers);
+            }
+
             if (!qc.commitment.IsNull()) {
+                if (debugLogs) {
+                    LogPrintf("CDeterministicMNManager::%s -- TRANSACTION_QUORUM_COMMITMENT got committment %d.\n", __func__, nHeight);
+                }
                 const auto& params = Params().GetConsensus().llmqs.at(qc.commitment.llmqType);
                 int quorumHeight = qc.nHeight - (qc.nHeight % params.dkgInterval);
                 auto quorumIndex = pindexPrev->GetAncestor(quorumHeight);

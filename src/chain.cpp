@@ -120,7 +120,6 @@ void CBlockIndex::BuildSkip()
 
 arith_uint256 GetBlockProof(const CBlockIndex& block)
 {
-    CBlockHeader header = block.GetBlockHeader();
     const Consensus::Params& params = Params().GetConsensus();
     // Compute the geometric mean of the block targets for each individual algorithm.
     arith_uint256 bnAvgTarget(1);
@@ -145,7 +144,7 @@ arith_uint256 GetBlockProof(const CBlockIndex& block)
     }
     for (int i = 0; i < CURRENT_ALGOS; i++)
     {
-        unsigned int nBits = GetNextWorkRequired(block.pprev, &header, params, i);
+        unsigned int nBits = GetNextWorkRequired(block.pprev, params, i);
         arith_uint256 bnTarget;
         bool fNegative;
         bool fOverflow;

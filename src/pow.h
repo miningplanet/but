@@ -14,6 +14,8 @@ class CBlockHeader;
 class CBlockIndex;
 class uint256;
 
+unsigned int GetNextWorkRequired(const CBlockIndex* pindexLast, const Consensus::Params&, int algo);
+
 unsigned int GetNextWorkRequired(const CBlockIndex* pindexLast, const CBlockHeader *pblock, const Consensus::Params&, int algo);
 
 unsigned int GetNextWorkRequiredV1(const CBlockIndex* pindexLast, const Consensus::Params&, int algo);

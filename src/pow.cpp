@@ -13,15 +13,30 @@
 
 #include <math.h>
 
-unsigned int GetNextWorkRequired(const CBlockIndex* pindexLast, const CBlockHeader *pblock, const Consensus::Params& params, int algo) {
+#include <sys/time.h>
 
-    if (!pindexLast || pindexLast->nHeight < params.v2DiffChangeHeight)
+#include <chrono>
+#include <ctime>
+#include <iostream>
+
+unsigned int GetNextWorkRequired(const CBlockIndex* pindexLast, const Consensus::Params& params, int algo) {
+
+    if (!pindexLast || pindexLast->nHeight < params.v2DiffChangeHeight) // 5
         return GetNextWorkRequiredV1(pindexLast, params, algo);
-    else if (pindexLast->nHeight < params.v3DiffChangeHeight)
+    else if (pindexLast->nHeight < params.v3DiffChangeHeight) // 10
         return GetNextWorkRequiredV2(pindexLast, params, algo);
     else
         return GetNextWorkRequiredV3(pindexLast, params, algo);
+}
 
+unsigned int GetNextWorkRequired(const CBlockIndex* pindexLast, const CBlockHeader *pblock, const Consensus::Params& params, int algo) {
+
+    if (!pindexLast || pindexLast->nHeight < params.v2DiffChangeHeight) // 5
+        return GetNextWorkRequiredV1(pindexLast, params, algo);
+    else if (pindexLast->nHeight < params.v3DiffChangeHeight) // 10
+        return GetNextWorkRequiredV2(pindexLast, params, algo);
+    else
+        return GetNextWorkRequiredV3(pindexLast, params, algo);
 }
 
 
@@ -159,14 +174,14 @@ unsigned int GetNextWorkRequiredV2(const CBlockIndex* pindexLast, const Consensu
 unsigned int GetNextWorkRequiredV3(const CBlockIndex* pindexLast, const Consensus::Params& params, int algo) {
     unsigned int npowWorkLimit = UintToArith256(params.powLimit).GetCompact();
 
-    // Genesis block
+    // Genesis block (only for height < 10 ...)
     if (pindexLast == nullptr)
         return npowWorkLimit;
 
     // find first block in averaging interval
     // Go back by what we want to be nAveragingInterval blocks per algo
     const CBlockIndex* pindexFirst = pindexLast;
-    if (pindexLast->nHeight < params.AlgoChangeHeight) {
+    if (pindexLast->nHeight < params.AlgoChangeHeight) { // 28
         for (int i = 0; pindexFirst && i < NUM_ALGOSV2 * params.nAveragingInterval; i++)
         {
             pindexFirst = pindexFirst->pprev;
@@ -194,14 +209,14 @@ unsigned int GetNextWorkRequiredV3(const CBlockIndex* pindexLast, const Consensu
     if (nActualTimespan > params.nMaxActualTimespanV3)
         nActualTimespan = params.nMaxActualTimespanV3;
 
-    //Global retarget
+    // Global retarget
     arith_uint256 bnNew;
     bnNew.SetCompact(pindexPrevAlgo->nBits);
 
     bnNew *= nActualTimespan;
     bnNew /= params.nAveragingTargetTimespanV2;
 
-    //Per-algo retarget
+    // Per-algo retarget
     int nAdjustments{0};
     if (pindexLast->nHeight < params.AlgoChangeHeight) {
         nAdjustments = pindexPrevAlgo->nHeight + NUM_ALGOSV2 - 1 - pindexLast->nHeight;
@@ -211,32 +226,33 @@ unsigned int GetNextWorkRequiredV3(const CBlockIndex* pindexLast, const Consensu
         nAdjustments = pindexPrevAlgo->nHeight + NUM_ALGOSV4 - 1 - pindexLast->nHeight;
     }
 
-    if (nAdjustments > 0)
-    {
+    const arith_uint256 powLimit = UintToArith256(params.powLimit);
+    const auto multiplicator = 100 + params.nLocalTargetAdjustment;
+    if (nAdjustments > 0) {
         for (int i = 0; i < nAdjustments; i++)
         {
             bnNew *= 100;
-            bnNew /= (100 + params.nLocalTargetAdjustment);
+            bnNew /= multiplicator;
         }
-    }
-    else if (nAdjustments < 0)
-    {
+    } else {
         for (int i = 0; i < -nAdjustments; i++)
         {
-            bnNew *= (100 + params.nLocalTargetAdjustment);
+            bnNew *= multiplicator;
             bnNew /= 100;
+            if (bnNew > powLimit) {
+                bnNew = powLimit;
+                break;
+            }
         }
     }
 
-    if (bnNew > UintToArith256(params.powLimit))
-    {
-        bnNew = UintToArith256(params.powLimit);
+    // Double check.
+    if (bnNew > powLimit) {
+        bnNew = powLimit;
     }
 
     return bnNew.GetCompact();
 }
-
-
 
 bool CheckProofOfWork(uint256 hash, unsigned int nBits, const Consensus::Params& params)
 {

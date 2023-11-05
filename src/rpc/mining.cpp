@@ -124,7 +124,9 @@ UniValue getnetworkhashps(const JSONRPCRequest& request)
        );
 
     LOCK(cs_main);
-    return GetNetworkHashPS(!request.params[0].isNull() ? request.params[0].get_int() : 120, !request.params[1].isNull() ? request.params[1].get_int() : -1);
+    int blocks = !request.params[0].isNull() ? request.params[0].get_int() : 120;
+    int height = !request.params[1].isNull() ? request.params[1].get_int() : -1;
+    return GetNetworkHashPS(blocks, height);
 }
 
 static UniValue getallnetworkhashps(const JSONRPCRequest& request)
@@ -136,7 +138,7 @@ static UniValue getallnetworkhashps(const JSONRPCRequest& request)
             "Pass in [blocks] to override # of blocks, -1 specifies since last difficulty change.\n"
             "Pass in [height] to estimate the network speed at the time when a certain block was found.\n"
             "\nArguments:\n"
-            "1. nblocks     (numeric, optional, default=360) The number of blocks, or -1 for blocks since last difficulty change.\n"
+            "1. nblocks     (numeric, optional, default=120) The number of blocks, or -1 for blocks since last difficulty change.\n"
             "2. height      (numeric, optional, default=-1) To estimate at the time of the given height.\n"
             "\nResult:\n"
             "x             (numeric) Hashes per second estimated\n"
@@ -146,8 +148,8 @@ static UniValue getallnetworkhashps(const JSONRPCRequest& request)
        );
 
     LOCK(cs_main);
-    int blocks = !request.params[0].isNull() ? request.params[0].get_int() : 360;
-    int height =  !request.params[1].isNull() ? request.params[1].get_int() : -1;
+    int blocks = !request.params[0].isNull() ? request.params[0].get_int() : 120;
+    int height = !request.params[1].isNull() ? request.params[1].get_int() : -1;
     UniValue obj(UniValue::VOBJ);
     obj.pushKV("butkscrypt", GetNetworkHashPS(blocks, height, ALGO_BUTKSCRYPT));
     obj.pushKV("scrypt", GetNetworkHashPS(blocks, height, ALGO_SCRYPT));
@@ -247,6 +249,9 @@ UniValue getmininginfo(const JSONRPCRequest& request)
         throw std::runtime_error(
             "getmininginfo\n"
             "\nReturns a json object containing mining-related information."
+            "\nArguments:\n"
+            "1. nblocks     (numeric, optional, default=120) The number of blocks, or -1 for blocks since last difficulty change.\n"
+            "2. height      (numeric, optional, default=-1) To estimate at the time of the given height.\n"
             "\nResult:\n"
             "{\n"
             "  \"blocks\": nnn,             (numeric) The current block\n"
@@ -267,7 +272,8 @@ UniValue getmininginfo(const JSONRPCRequest& request)
 
 
     LOCK(cs_main);
-
+    int blocks = !request.params[0].isNull() ? request.params[0].get_int() : 120;
+    int height = !request.params[1].isNull() ? request.params[1].get_int() : -1;
     UniValue obj(UniValue::VOBJ);
     obj.push_back(Pair("blocks",           (int)chainActive.Height()));
     obj.push_back(Pair("currentblocksize", (uint64_t)nLastBlockSize));
@@ -275,12 +281,12 @@ UniValue getmininginfo(const JSONRPCRequest& request)
     obj.pushKV("difficulty",               (double)GetDifficulty(chainActive.Tip()));
     obj.push_back(Pair("errors",           GetWarnings("statusbar")));
     obj.push_back(Pair("networkhashps",    getnetworkhashps(request)));
-    obj.pushKV("networkhashps_ghostrider", GetNetworkHashPS(120, -1, ALGO_GHOSTRIDER));
-    obj.pushKV("networkhashps_yespower",   GetNetworkHashPS(120, -1, ALGO_YESPOWER));
-    obj.pushKV("networkhashps_lyra2",      GetNetworkHashPS(120, -1, ALGO_LYRA2));
-    obj.pushKV("networkhashps_sha256d",    GetNetworkHashPS(120, -1, ALGO_SHA256D));
-    obj.pushKV("networkhashps_scrypt",     GetNetworkHashPS(120, -1, ALGO_SCRYPT));
-    obj.pushKV("networkhashps_butkscrypt", GetNetworkHashPS(120, -1, ALGO_BUTKSCRYPT));
+    obj.pushKV("networkhashps_ghostrider", GetNetworkHashPS(blocks, height, ALGO_GHOSTRIDER));
+    obj.pushKV("networkhashps_yespower",   GetNetworkHashPS(blocks, height, ALGO_YESPOWER));
+    obj.pushKV("networkhashps_lyra2",      GetNetworkHashPS(blocks, height, ALGO_LYRA2));
+    obj.pushKV("networkhashps_sha256d",    GetNetworkHashPS(blocks, height, ALGO_SHA256D));
+    obj.pushKV("networkhashps_scrypt",     GetNetworkHashPS(blocks, height, ALGO_SCRYPT));
+    obj.pushKV("networkhashps_butkscrypt", GetNetworkHashPS(blocks, height, ALGO_BUTKSCRYPT));
     obj.push_back(Pair("hashespersec",     (double)nHashesPerSec));
 	obj.push_back(Pair("algos",            (std::string)alsoHashString));
 	obj.push_back(Pair("pooledtx",         (uint64_t)mempool.size()));
@@ -1150,7 +1156,7 @@ static const CRPCCommand commands[] =
   //  --------------------- ------------------------  -----------------------  ----------
     { "mining",             "getnetworkhashps",       &getnetworkhashps,       true,  {"nblocks","height"} },
     { "mining",             "getallnetworkhashps",    &getallnetworkhashps,    true,  {"nblocks","height"} },
-    { "mining",             "getmininginfo",          &getmininginfo,          true,  {} },
+    { "mining",             "getmininginfo",          &getmininginfo,          true,  {"nblocks","height"} },
     { "mining",             "prioritisetransaction",  &prioritisetransaction,  true,  {"txid","fee_delta"} },
     { "mining",             "getblocktemplate",       &getblocktemplate,       true,  {"template_request", "algo"} },
     { "mining",             "submitblock",            &submitblock,            true,  {"hexdata","dummy"} },

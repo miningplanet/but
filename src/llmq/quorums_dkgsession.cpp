@@ -92,7 +92,6 @@ CDKGMember::CDKGMember(CDeterministicMNCPtr _dmn, size_t _idx) :
 bool CDKGSession::Init(const CBlockIndex* _pindexQuorum, const std::vector<CDeterministicMNCPtr>& mns, const uint256& _myProTxHash)
 {
     if (mns.size() < params.minSize) {
-    std::cout << "mns.size() < params.minSize " << mns.size() << "-" << params.minSize << endl;
         return false;
     }
 
@@ -908,7 +907,7 @@ void CDKGSession::SendCommitment(CDKGPendingMessages& pendingMessages)
     }
 
     if (qc.CountValidMembers() < params.minSize) {
-        logger.Batch("not enough valid members. not sending commitment");
+        logger.Batch("Not enough valid members (valid=%d, min=%d, members=%d). not sending commitment", qc.CountValidMembers(), params.minSize, members.size());
         return;
     }
 
@@ -1183,6 +1182,8 @@ std::vector<CFinalCommitment> CDKGSession::FinalizeCommitments()
         auto& cvec = p.second;
         if (cvec.size() < params.minSize) {
             // commitment was signed by a minority
+            logger.Batch("Commitment by minority: validMembers=%d, min=%d", cvec.size(), params.minSize);
+            logger.Flush();
             continue;
         }
 
