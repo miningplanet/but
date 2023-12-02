@@ -231,18 +231,22 @@ unsigned int GetNextWorkRequiredV3(const CBlockIndex* pindexLast, const Consensu
     if (nAdjustments > 0) {
         for (int i = 0; i < nAdjustments; i++)
         {
+            if (bnNew > powLimit) {
+                bnNew = powLimit;
+                return bnNew.GetCompact();
+            }
             bnNew *= 100;
             bnNew /= multiplicator;
         }
     } else {
         for (int i = 0; i < -nAdjustments; i++)
         {
-            bnNew *= multiplicator;
-            bnNew /= 100;
             if (bnNew > powLimit) {
                 bnNew = powLimit;
-                break;
+                return bnNew.GetCompact();
             }
+            bnNew *= multiplicator;
+            bnNew /= 100;
         }
     }
 
