@@ -60,7 +60,7 @@ unsigned int ParseConfirmTarget(const UniValue& value)
  * or from the last difficulty change if 'lookup' is nonpositive.
  * If 'height' is nonnegative, compute the estimate at the time when a given block was found.
  */
-UniValue GetNetworkHashPS(int lookup, int height,int algo = ALGO) {
+UniValue GetNetworkHashPS(int lookup, int height, int algo = ALGO) {
     CBlockIndex *pb = GetLastBlockIndex4Algo(chainActive.Tip(), algo);
 
     if (height >= 0 && height < chainActive.Height())
@@ -114,7 +114,7 @@ UniValue getnetworkhashps(const JSONRPCRequest& request)
             "Pass in [blocks] to override # of blocks, -1 specifies since last difficulty change.\n"
             "Pass in [height] to estimate the network speed at the time when a certain block was found.\n"
             "\nArguments:\n"
-            "1. nblocks     (numeric, optional, default=120) The number of blocks, or -1 for blocks since last difficulty change.\n"
+            "1. nblocks     (numeric, optional, default=-1) The number of blocks, or -1 for blocks since last difficulty change.\n"
             "2. height      (numeric, optional, default=-1) To estimate at the time of the given height.\n"
             "\nResult:\n"
             "x             (numeric) Hashes per second estimated\n"
@@ -124,7 +124,7 @@ UniValue getnetworkhashps(const JSONRPCRequest& request)
        );
 
     LOCK(cs_main);
-    int blocks = !request.params[0].isNull() ? request.params[0].get_int() : 120;
+    int blocks = !request.params[0].isNull() ? request.params[0].get_int() : -1;
     int height = !request.params[1].isNull() ? request.params[1].get_int() : -1;
     return GetNetworkHashPS(blocks, height);
 }
@@ -138,25 +138,30 @@ static UniValue getallnetworkhashps(const JSONRPCRequest& request)
             "Pass in [blocks] to override # of blocks, -1 specifies since last difficulty change.\n"
             "Pass in [height] to estimate the network speed at the time when a certain block was found.\n"
             "\nArguments:\n"
-            "1. nblocks     (numeric, optional, default=120) The number of blocks, or -1 for blocks since last difficulty change.\n"
+            "1. nblocks     (numeric, optional, default=-1) The number of blocks, or -1 for blocks since last difficulty change.\n"
             "2. height      (numeric, optional, default=-1) To estimate at the time of the given height.\n"
             "\nResult:\n"
-            "x             (numeric) Hashes per second estimated\n"
+            "  \"butkscrypt\": xxxxxx,    (numeric) network hashes per second for Butkscrypt\n"
+            "  \"sha256d\": xxxxxx,       (numeric) network hashes per second for Sha256d\n"
+            "  \"lyra2\": xxxxxx,         (numeric) network hashes per second for Lyra2\n"
+            "  \"ghostrider\": xxxxxx,    (numeric) network hashes per second for Ghostrider\n"
+            "  \"yespower\": xxxxxx,      (numeric) network hashes per second for Yespower\n"
+            "  \"scrypt\": xxxxxx,        (numeric) network hashes per second for Scrypt\n"
             "\nExamples:\n"
             + HelpExampleCli("getallnetworkhashps", "")
             + HelpExampleRpc("getallnetworkhashps", "")
        );
 
     LOCK(cs_main);
-    int blocks = !request.params[0].isNull() ? request.params[0].get_int() : 120;
+    int blocks = !request.params[0].isNull() ? request.params[0].get_int() : -1;
     int height = !request.params[1].isNull() ? request.params[1].get_int() : -1;
     UniValue obj(UniValue::VOBJ);
-    obj.pushKV("butkscrypt", GetNetworkHashPS(blocks, height, ALGO_BUTKSCRYPT));
-    obj.pushKV("scrypt", GetNetworkHashPS(blocks, height, ALGO_SCRYPT));
-    obj.pushKV("sha256d", GetNetworkHashPS(blocks, height, ALGO_SHA256D));
-    obj.pushKV("lyra2", GetNetworkHashPS(blocks, height, ALGO_LYRA2));
-    obj.pushKV("ghostrider", GetNetworkHashPS(blocks, height, ALGO_GHOSTRIDER));
-    obj.pushKV("yespower", GetNetworkHashPS(blocks, height, ALGO_YESPOWER));
+    obj.pushKV("butkscrypt",    GetNetworkHashPS(blocks, height, ALGO_BUTKSCRYPT));
+    obj.pushKV("sha256d",       GetNetworkHashPS(blocks, height, ALGO_SHA256D));
+    obj.pushKV("lyra2",         GetNetworkHashPS(blocks, height, ALGO_LYRA2));
+    obj.pushKV("ghostrider",    GetNetworkHashPS(blocks, height, ALGO_GHOSTRIDER));
+    obj.pushKV("yespower",      GetNetworkHashPS(blocks, height, ALGO_YESPOWER));
+    obj.pushKV("scrypt",        GetNetworkHashPS(blocks, height, ALGO_SCRYPT));
     return obj;
 }
 
@@ -243,55 +248,75 @@ UniValue generatetoaddress(const JSONRPCRequest& request)
 }
 #endif // ENABLE_MINER
 
-UniValue getmininginfo(const JSONRPCRequest& request)
+static UniValue getmininginfo(const JSONRPCRequest& request)
 {
-    if (request.fHelp || request.params.size() != 0)
+    if (request.fHelp || request.params.size() > 2)
         throw std::runtime_error(
             "getmininginfo\n"
             "\nReturns a json object containing mining-related information."
+            "\nDifficulties, except for the tip are calculated since last block mined with its algo.\n"
             "\nArguments:\n"
-            "1. nblocks     (numeric, optional, default=120) The number of blocks, or -1 for blocks since last difficulty change.\n"
+            "1. nblocks     (numeric, optional, default=-1) The number of blocks, or -1 for blocks since last difficulty change.\n"
             "2. height      (numeric, optional, default=-1) To estimate at the time of the given height.\n"
             "\nResult:\n"
             "{\n"
-            "  \"blocks\": nnn,             (numeric) The current block\n"
-            "  \"currentblocksize\": nnn,   (numeric) The last block size\n"
-            "  \"currentblocktx\": nnn,     (numeric) The last block transaction\n"
-            "  \"difficulty\": xxx.xxxxx    (numeric) The current difficulty\n"
-            "  \"errors\": \"...\"            (string) Current errors\n"
-            "  \"networkhashps\": nnn,      (numeric) The network hashes per second\n"
-			"  \"hashespersec\": nnn,       (numeric) Your current hashes per second\n"
-			"  \"algos\": nnn,              (string) Current solving block algos orders\n"
-            "  \"pooledtx\": n              (numeric) The size of the mempool\n"
-            "  \"chain\": \"xxxx\",           (string) current network name as defined in BIP70 (main, test, regtest)\n"
+            "  \"blocks\": nnn,                         (numeric) The current block\n"
+            "  \"currentblocksize\": nnn,               (numeric) The last block size\n"
+            "  \"currentblocktx\": nnn,                 (numeric) The last block transaction\n"
+            "  \"difficulty\": xxxxx                    (numeric) The current difficulty (-algo=<algo>, default: butkscrypt)\n"
+            "  \"difficulty_tip\": xxxxxx,              (numeric) the current difficulty for the tip\n"
+            "  \"difficulty_butkscrypt\": xxxxxx,       (numeric) the current difficulty for Butkscrypt\n"
+            "  \"difficulty_sha256d\": xxxxxx,          (numeric) the current difficulty for Sha256d\n"
+            "  \"difficulty_lyra2\": xxxxxx,            (numeric) the current difficulty for Lyra2\n"
+            "  \"difficulty_ghostrider\": xxxxxx,       (numeric) the current difficulty for Ghostrider\n"
+            "  \"difficulty_yespower\": xxxxxx,         (numeric) the current difficulty for Yespower\n"
+            "  \"difficulty_scrypt\": xxxxxx,           (numeric) the current difficulty for Scrypt\n"
+            "  \"errors\": \"...\"                      (string) Current errors\n"
+            "  \"networkhashps\": xxxxxx,               (numeric) The network hashes per second (-algo=<algo>, default: butkscrypt)\n"
+            "  \"networkhashps_butkscrypt\": xxxxxx,    (numeric) network hashes per second for Butkscrypt\n"
+            "  \"networkhashps_sha256d\": xxxxxx,       (numeric) network hashes per second for Sha256d\n"
+            "  \"networkhashps_lyra2\": xxxxxx,         (numeric) network hashes per second for Lyra2\n"
+            "  \"networkhashps_ghostrider\": xxxxxx,    (numeric) network hashes per second for Ghostrider\n"
+            "  \"networkhashps_yespower\": xxxxxx,      (numeric) network hashes per second for Yespower\n"
+            "  \"networkhashps_scrypt\": xxxxxx,        (numeric) network hashes per second for Scrypt\n"
+			"  \"hashespersec\": nnn,                   (numeric) Your current hashes per second\n"
+			"  \"algos\": nnn,                          (string) Current solving block algos orders\n"
+            "  \"pooledtx\": n                          (numeric) The size of the mempool\n"
+            "  \"chain\": \"xxxx\",                     (string) current network name as defined in BIP70 (main, test, regtest)\n"
             "}\n"
             "\nExamples:\n"
             + HelpExampleCli("getmininginfo", "")
             + HelpExampleRpc("getmininginfo", "")
         );
 
-
     LOCK(cs_main);
-    int blocks = !request.params[0].isNull() ? request.params[0].get_int() : 120;
+    int blocks = !request.params[0].isNull() ? request.params[0].get_int() : -1;
     int height = !request.params[1].isNull() ? request.params[1].get_int() : -1;
-    UniValue obj(UniValue::VOBJ);
-    obj.push_back(Pair("blocks",           (int)chainActive.Height()));
-    obj.push_back(Pair("currentblocksize", (uint64_t)nLastBlockSize));
-    obj.push_back(Pair("currentblocktx",   (uint64_t)nLastBlockTx));
-    obj.pushKV("difficulty",               (double)GetDifficulty(chainActive.Tip()));
-    obj.push_back(Pair("errors",           GetWarnings("statusbar")));
-    obj.push_back(Pair("networkhashps",    getnetworkhashps(request)));
-    obj.pushKV("networkhashps_ghostrider", GetNetworkHashPS(blocks, height, ALGO_GHOSTRIDER));
-    obj.pushKV("networkhashps_yespower",   GetNetworkHashPS(blocks, height, ALGO_YESPOWER));
-    obj.pushKV("networkhashps_lyra2",      GetNetworkHashPS(blocks, height, ALGO_LYRA2));
-    obj.pushKV("networkhashps_sha256d",    GetNetworkHashPS(blocks, height, ALGO_SHA256D));
-    obj.pushKV("networkhashps_scrypt",     GetNetworkHashPS(blocks, height, ALGO_SCRYPT));
-    obj.pushKV("networkhashps_butkscrypt", GetNetworkHashPS(blocks, height, ALGO_BUTKSCRYPT));
-    obj.push_back(Pair("hashespersec",     (double)nHashesPerSec));
-	obj.push_back(Pair("algos",            (std::string)alsoHashString));
-	obj.push_back(Pair("pooledtx",         (uint64_t)mempool.size()));
-	obj.push_back(Pair("chain",            Params().NetworkIDString()));
 
+    UniValue obj(UniValue::VOBJ);
+    obj.push_back(Pair("blocks",            (int) chainActive.Height()));
+    obj.push_back(Pair("currentblocksize",  (uint64_t) nLastBlockSize));
+    obj.push_back(Pair("currentblocktx",    (uint64_t) nLastBlockTx));
+    obj.pushKV("difficulty",                GetDifficulty(ALGO));
+    obj.pushKV("difficulty_tip",            GetDifficulty(chainActive.Tip()));
+    obj.pushKV("difficulty_butkscrypt",     GetDifficulty(ALGO_BUTKSCRYPT));
+    obj.pushKV("difficulty_sha256d",        GetDifficulty(ALGO_SHA256D));
+    obj.pushKV("difficulty_lyra2",          GetDifficulty(ALGO_LYRA2));
+    obj.pushKV("difficulty_ghostrider",     GetDifficulty(ALGO_GHOSTRIDER));
+    obj.pushKV("difficulty_yespower",       GetDifficulty(ALGO_YESPOWER));
+    obj.pushKV("difficulty_scrypt",         GetDifficulty(ALGO_SCRYPT));
+    obj.push_back(Pair("errors",            GetWarnings("statusbar")));
+    obj.push_back(Pair("networkhashps",     getnetworkhashps(request)));
+    obj.pushKV("networkhashps_butkscrypt",  GetNetworkHashPS(blocks, height, ALGO_BUTKSCRYPT));
+    obj.pushKV("networkhashps_sha256d",     GetNetworkHashPS(blocks, height, ALGO_SHA256D));
+    obj.pushKV("networkhashps_lyra2",       GetNetworkHashPS(blocks, height, ALGO_LYRA2));
+    obj.pushKV("networkhashps_ghostrider",  GetNetworkHashPS(blocks, height, ALGO_GHOSTRIDER));
+    obj.pushKV("networkhashps_yespower",    GetNetworkHashPS(blocks, height, ALGO_YESPOWER));
+    obj.pushKV("networkhashps_scrypt",      GetNetworkHashPS(blocks, height, ALGO_SCRYPT));
+    obj.push_back(Pair("hashespersec",      (double)nHashesPerSec));
+	obj.push_back(Pair("algos",             (std::string)alsoHashString));
+	obj.push_back(Pair("pooledtx",          (uint64_t)mempool.size()));
+	obj.push_back(Pair("chain",             Params().NetworkIDString()));
     return obj;
 }
 
