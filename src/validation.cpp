@@ -3275,6 +3275,97 @@ bool CheckBlock(const CBlock& block, CValidationState& state, const Consensus::P
     return true;
 }
 
+static vector<int> nBitsToSkip {
+	571,
+	863,
+	186937,
+	348577,
+	348694,
+	349110,
+	349530,
+	350421,
+	350726,
+	352885,
+	354623,
+	374933,
+	375267,
+	609796,
+	613518,
+	614506,
+	616629,
+	621983,
+	622464,
+	622639,
+	622898,
+	623052,
+	623060,
+	623231,
+	623362,
+	623720,
+	623991,
+	624276,
+	625030,
+	625152,
+	625565,
+	641171,
+	641560,
+	641995,
+	642134,
+	642403,
+	642555,
+	642995,
+	644292,
+	644545,
+	644748,
+	645803,
+	646665,
+	647943,
+	650199,
+	650541,
+	651028,
+	651905,
+	652376,
+	652825,
+	653406,
+	653592,
+	654815,
+	655809,
+	655905,
+	658321,
+	658572,
+	659728,
+	660822,
+	664028,
+	664060,
+	664230,
+	664351,
+	664433,
+	664573,
+	664766,
+	667500,
+	667694,
+	668079,
+	668305,
+	674579,
+	676278,
+	676780,
+	677440,
+	679707,
+	680741,
+	683265,
+	683620,
+	684174,
+	686310,
+	686677,
+	691228,
+	692643,
+    695480,
+    703324,
+    708874,
+    714495,
+    723574,
+    725440 };
+
 /** Context-dependent validity checks.
  *  By "context", we mean only the previous block headers, but not the UTXO
  *  set; UTXO-related validity checks are done in ConnectBlock(). */
@@ -3285,8 +3376,11 @@ static bool ContextualCheckBlockHeader(const CBlockHeader& block, CValidationSta
 
     // Check proof of work
     const Consensus::Params& consensusParams = params.GetConsensus();
-        if (block.nBits != GetNextWorkRequired(pindexPrev, &block, consensusParams, block.GetAlgo()))
+    int nBits = GetNextWorkRequired(pindexPrev, &block, consensusParams, block.GetAlgo());
+    if (block.nBits != nBits) {
+        if (std::find(nBitsToSkip.begin(), nBitsToSkip.end(), nHeight) == nBitsToSkip.end())
             return state.DoS(100, false, REJECT_INVALID, "bad-diffbits", false, strprintf("incorrect proof of work at %d", nHeight));
+    }            
 
     // Check against checkpoints
     if (fCheckpointsEnabled) {
