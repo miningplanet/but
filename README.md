@@ -1,3 +1,8 @@
+Please use but by miningplanet https://github.com/miningplanet/but
+
+The latest release you can find here. https://github.com/miningplanet/but/releases/tag/v1.3.3.0
+
+
 <a href="https://discord.gg/9x7gKH899g"><img src="https://img.shields.io/discord/833791711217844244.svg?style=flat&label=Join%20Community&color=7289DA" alt="Join Community Badge"/></a>
 
   
