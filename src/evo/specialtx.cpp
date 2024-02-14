@@ -100,11 +100,13 @@ bool ProcessSpecialTxsInBlock(const CBlock& block, const CBlockIndex* pindex, CV
     for (int i = 0; i < (int)block.vtx.size(); i++) {
         const CTransaction& tx = *block.vtx[i];
         if (!CheckSpecialTx(tx, pindex->pprev, state)) {
-        	std::cout << "fail to check CheckSpecialTx\n";
+            LogPrintf("Failed to check CheckSpecialTx\n");
+        	// std::cout << "fail to check CheckSpecialTx\n";
             return false;
         }
         if (!ProcessSpecialTx(tx, pindex, state)) {
-        	std::cout << "fail to check ProcessSpecialTx\n";
+            LogPrintf("Failed to process CheckSpecialTx\n");
+        	// std::cout << "fail to check ProcessSpecialTx\n";
             return false;
         }
     }
@@ -113,7 +115,8 @@ bool ProcessSpecialTxsInBlock(const CBlock& block, const CBlockIndex* pindex, CV
     LogPrint(BCLog::BENCHMARK, "        - Loop: %.2fms [%.2fs]\n", 0.001 * (nTime2 - nTime1), nTimeLoop * 0.000001);
 
     if (!llmq::quorumBlockProcessor->ProcessBlock(block, pindex, state)) {
-    	std::cout << "fail to check llmq::quorumBlockProcessor->ProcessBlock\n";
+        LogPrintf("Failed to check llmq::quorumBlockProcessor->ProcessBlock\n");
+    	// std::cout << "fail to check llmq::quorumBlockProcessor->ProcessBlock\n";
         return false;
     }
 
@@ -121,7 +124,8 @@ bool ProcessSpecialTxsInBlock(const CBlock& block, const CBlockIndex* pindex, CV
     LogPrint(BCLog::BENCHMARK, "        - quorumBlockProcessor: %.2fms [%.2fs]\n", 0.001 * (nTime3 - nTime2), nTimeQuorum * 0.000001);
 
     if (!deterministicMNManager->ProcessBlock(block, pindex, state, fJustCheck)) {
-    	std::cout << "fail to check deterministicMNManager->ProcessBlock\n";
+        LogPrintf("Failed to check deterministicMNManager->ProcessBlock\n");
+    	// std::cout << "fail to check deterministicMNManager->ProcessBlock\n";
         return false;
     }
 
@@ -129,7 +133,8 @@ bool ProcessSpecialTxsInBlock(const CBlock& block, const CBlockIndex* pindex, CV
     LogPrint(BCLog::BENCHMARK, "        - deterministicMNManager: %.2fms [%.2fs]\n", 0.001 * (nTime4 - nTime3), nTimeDMN * 0.000001);
 
     if (fCheckCbTxMerleRoots && !CheckCbTxMerkleRoots(block, pindex, state)) {
-    	std::cout << "fail to check CheckCbTxMerkleRoots\n";
+        LogPrintf("Failed to check CheckCbTxMerkleRoots\n");
+    	// std::cout << "fail to check CheckCbTxMerkleRoots\n";
         return false;
     }
 
