@@ -438,7 +438,7 @@ public:
         consensus.DIP0001Enabled = true;
         consensus.DIP0003Enabled = true;
         consensus.DIP0008Enabled = true;
-       // consensus.DIP0003EnforcementHeight = 1047200;
+        // consensus.DIP0003EnforcementHeight = 1047200;
         consensus.powLimit = uint256S("00ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"); // ~uint256(0) >> 20
         consensus.nPowTargetTimespan = 60; // But: 1 minutes
         consensus.nPowTargetSpacing =  60; // But: 1 minutes
@@ -513,23 +513,23 @@ public:
 
         // But BIP44 coin type is '630'
         nExtCoinType = 630;
-        vector<FounderRewardStructure> rewardStructures = {  {INT_MAX, 5}// 5% founder/dev fee forever
-                                        										   };
+        // 5% founder/dev fee forever
+        vector<FounderRewardStructure> rewardStructures = { {INT_MAX, 5} };
         consensus.nFounderPayment = FounderPayment(rewardStructures, 250);
         consensus.nCollaterals = SmartnodeCollaterals(
 			{
 				{150000, 6000000 * COIN},
-                                {150001, 8000000 * COIN},
-                                {500000, 15000000 * COIN},
-                                {700000, 20000000 * COIN},
-                                {INT_MAX, 25000000 * COIN}
+                {150001, 8000000 * COIN},
+                {500000, 15000000 * COIN},
+                {700000, 20000000 * COIN},
+                {INT_MAX, 25000000 * COIN}
 			},
 			{
 				{5761, 0}, {INT_MAX, 20}
 			}
         );
 
-        //vFixedSeeds = std::vector<SeedSpec6>(pnSeed6_main, pnSeed6_main + ARRAYLEN(pnSeed6_main));
+        // vFixedSeeds = std::vector<SeedSpec6>(pnSeed6_main, pnSeed6_main + ARRAYLEN(pnSeed6_main));
         vFixedSeeds = std::vector<SeedSpec6>();
         // long living quorum params
         consensus.llmqs[Consensus::LLMQ_50_60] = llmq3_60;
@@ -586,8 +586,8 @@ public:
         strNetworkID = "test";
         consensus.nSubsidyHalvingInterval = 210240;
         consensus.nSmartnodePaymentsStartBlock = 4010; // not true, but it's ok as long as it's less then nSmartnodePaymentsIncreaseBlock
-        consensus.nSmartnodePaymentsIncreaseBlock = 4030;
-        consensus.nSmartnodePaymentsIncreasePeriod = 10;
+        consensus.nSmartnodePaymentsIncreaseBlock = 4030; // unused
+        consensus.nSmartnodePaymentsIncreasePeriod = 10; // unused
         consensus.nInstantSendConfirmationsRequired = 2;
         consensus.nInstantSendKeepLock = 6;
         consensus.nBudgetPaymentsStartBlock = 4100;
@@ -606,7 +606,7 @@ public:
         consensus.DIP0003Enabled = true;
         consensus.BIPCSVEnabled = true;
         consensus.BIP147Enabled = true;
-     //   consensus.DIP0003EnforcementHeight = 7300;
+        // consensus.DIP0003EnforcementHeight = 7300;
         consensus.powLimit = uint256S("00ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"); // ~uint256(0) >> 20
         consensus.nAveragingInterval = 10; // 10 blocks
         consensus.nAveragingTargetTimespan = consensus.nAveragingInterval * 90 * 4; // 10 * NUM_ALGOS * 90
@@ -624,7 +624,7 @@ public:
         consensus.fPowAllowMinDifficultyBlocks = true;
         consensus.fPowNoRetargeting = false;
         consensus.nPowDGWHeight = 60;
-	consensus.DGWBlocksAvg = 60;
+	    consensus.DGWBlocksAvg = 60;
         consensus.nRuleChangeActivationThreshold = 1512; // 75% for testchains
         consensus.nMinerConfirmationWindow = 2016; // nPowTargetTimespan / nPowTargetSpacing
         consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].bit = 28;
@@ -635,7 +635,7 @@ public:
         consensus.nMinimumChainWork = uint256S("0x0");
 
         // By default assume that the signatures in ancestors of this block are valid.
-        consensus.defaultAssumeValid = uint256S("0x0");
+        consensus.defaultAssumeValid = uint256S("0x0"); // unused
 
         pchMessageStart[0] = 0x38;
         pchMessageStart[1] = 0xe2;
@@ -643,7 +643,7 @@ public:
         pchMessageStart[3] = 0xff;
         nDefaultPort = 34340;
         nPruneAfterHeight = 1000;
-    //    FindMainNetGenesisBlock(1618300101,  0x20001fff, "test");
+        // FindMainNetGenesisBlock(1618300101,  0x20001fff, "test");
         genesis = CreateGenesisBlock(1618300101, 1957, 0x20001fff, 4, 5000 * COIN);
         consensus.hashGenesisBlock = genesis.GetHash();
         assert(consensus.hashGenesisBlock == uint256S("0x001efd3021f4414e897125d9e85ec42c3e0dc360d2b6ce7853e7a2900448c63a"));
@@ -671,24 +671,21 @@ public:
         nExtCoinType = 1;
 
         // long living quorum params
-        consensus.llmqs[Consensus::LLMQ_50_60] = llmq50_60;
-        consensus.llmqs[Consensus::LLMQ_400_60] = llmq400_60;
-        consensus.llmqs[Consensus::LLMQ_400_85] = llmq400_85;
-        consensus.llmqTypeChainLocks = Consensus::LLMQ_50_60;
-        consensus.llmqTypeInstantSend = Consensus::LLMQ_50_60;
-
-        vector<FounderRewardStructure> rewardStructures = {  {INT_MAX, 5}// 5% founder/dev fee forever
-                                                										   };
-	consensus.nFounderPayment = FounderPayment(rewardStructures, 200);
+        
+        // 5% founder/dev fee forever
+        vector<FounderRewardStructure> rewardStructures = { { INT_MAX, 5 } };
+	    consensus.nFounderPayment = FounderPayment(rewardStructures, 200);
 
         consensus.nCollaterals = SmartnodeCollaterals(
 			{
-				{40000, 15000000 * COIN}, {INT_MAX, 20000000 * COIN}
+				{40000, 15000000 * COIN},
+                {INT_MAX, 20000000 * COIN}
 			},
 			{
 				{200, 0}, {INT_MAX, 20}
 			}
         );
+
         fDefaultConsistencyChecks = false;
         fRequireStandard = false;
         fRequireRoutableExternalIP = true;
@@ -751,7 +748,7 @@ public:
         consensus.BIP66Enabled = true; // BIP66 activated immediately on devnet
         consensus.DIP0001Enabled = true; // DIP0001 activated immediately on devnet
         consensus.DIP0003Enabled = true; // DIP0003 activated immediately on devnet
-       // consensus.DIP0003EnforcementHeight = 2; // DIP0003 activated immediately on devnet
+        // consensus.DIP0003EnforcementHeight = 2; // DIP0003 activated immediately on devnet
         consensus.powLimit = uint256S("7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"); // ~uint256(0) >> 1
         consensus.nPowTargetTimespan = 60; // But: 1 minutes
         consensus.nPowTargetSpacing = 60; // But: 1 minutes
@@ -769,7 +766,7 @@ public:
         consensus.fPowAllowMinDifficultyBlocks = true;
         consensus.fPowNoRetargeting = false;
         consensus.nPowDGWHeight = 60;
-	consensus.DGWBlocksAvg = 60;
+        consensus.DGWBlocksAvg = 60;
         consensus.nRuleChangeActivationThreshold = 1512; // 75% for testchains
         consensus.nMinerConfirmationWindow = 2016; // nPowTargetTimespan / nPowTargetSpacing
         consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].bit = 28;
@@ -883,7 +880,7 @@ public:
         consensus.BIP66Enabled = true; // BIP66 activated on regtest (Used in rpc activation tests)
         consensus.DIP0001Enabled = true;
         consensus.DIP0003Enabled = true;
-       // consensus.DIP0003EnforcementHeight = 500;
+        // consensus.DIP0003EnforcementHeight = 500;
         consensus.powLimit = uint256S("7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"); // ~uint256(0) >> 1
         consensus.nPowTargetTimespan = 60; // But: 1 day
         consensus.nPowTargetSpacing =  60; // But: 2.5 minutes
@@ -900,7 +897,7 @@ public:
         consensus.fPowAllowMinDifficultyBlocks = true;
         consensus.fPowNoRetargeting = true;
         consensus.nPowDGWHeight = 60;
-	consensus.DGWBlocksAvg = 60;
+	    consensus.DGWBlocksAvg = 60;
         consensus.nRuleChangeActivationThreshold = 108; // 75% for testchains
         consensus.nMinerConfirmationWindow = 144; // Faster than normal for regtest (144 instead of 2016)
         consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].bit = 28;
@@ -954,7 +951,7 @@ public:
             }
         };
 
-        chainTxData = ChainTxData{
+        chainTxData = ChainTxData {
             0,
             0,
             0
