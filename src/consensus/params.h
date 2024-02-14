@@ -195,7 +195,6 @@ struct Params {
 
     FounderPayment nFounderPayment;
     SmartnodeCollaterals nCollaterals;
-    int smartnodePaymentFixedBlock;
 
 };
 } // namespace Consensus
