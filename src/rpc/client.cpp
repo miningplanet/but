@@ -41,6 +41,8 @@ static const CRPCConvertParam vRPCConvertParams[] =
 #endif // ENABLE_MINER
     { "getnetworkhashps", 0, "nblocks" },
     { "getnetworkhashps", 1, "height" },
+    { "getallnetworkhashps", 0, "nblocks" },
+    { "getallnetworkhashps", 1, "height" },
     { "sendtoaddress", 1, "amount" },
     { "sendtoaddress", 4, "subtractfeefromamount" },
     { "sendtoaddress", 5, "use_is" },
