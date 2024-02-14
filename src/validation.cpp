@@ -3879,10 +3879,15 @@ bool static LoadBlockIndexDB(const CChainParams& chainparams)
             mapPrevBlockIndex.emplace(pindex->pprev->GetBlockHash(), pindex);
         }
     }
+    LogPrintf("Validate chain with height %d ...\n", vSortedByHeight.size());
     sort(vSortedByHeight.begin(), vSortedByHeight.end());
     for (const std::pair<int, CBlockIndex*>& item : vSortedByHeight)
     {
         CBlockIndex* pindex = item.second;
+
+        if (item.first % 10000 == 0) {
+            LogPrintf("Validated block %d\n", item.first);
+        }
         pindex->nChainWork = (pindex->pprev ? pindex->pprev->nChainWork : 0) + GetBlockProof(*pindex);
         pindex->nTimeMax = (pindex->pprev ? std::max(pindex->pprev->nTimeMax, pindex->nTime) : pindex->nTime);
         // We can link the chain of blocks for which we've received transactions at some point.
