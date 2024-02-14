@@ -1404,24 +1404,32 @@ UniValue getblockchaininfo(const JSONRPCRequest& request)
         throw std::runtime_error(
             "getblockchaininfo\n"
             "Returns an object containing various state info regarding blockchain processing.\n"
+            "Difficulties, except for the tip are calculated since last block mined with its algo.\n"
             "\nResult:\n"
             "{\n"
-            "  \"chain\": \"xxxx\",        (string) current network name as defined in BIP70 (main, test, regtest)\n"
-            "  \"blocks\": xxxxxx,         (numeric) the current number of blocks processed in the server\n"
-            "  \"headers\": xxxxxx,        (numeric) the current number of headers we have validated\n"
-            "  \"bestblockhash\": \"...\", (string) the hash of the currently best block\n"
-            "  \"difficulty\": xxxxxx,     (numeric) the current difficulty\n"
-            "  \"mediantime\": xxxxxx,     (numeric) median time for the current best block\n"
-            "  \"verificationprogress\": xxxx, (numeric) estimate of verification progress [0..1]\n"
-            "  \"chainwork\": \"xxxx\"     (string) total amount of work in active chain, in hexadecimal\n"
-            "  \"pruned\": xx,             (boolean) if the blocks are subject to pruning\n"
-            "  \"pruneheight\": xxxxxx,    (numeric) lowest-height complete block stored\n"
-            "  \"softforks\": [            (array) status of softforks in progress\n"
+            "  \"chain\": \"xxxx\",                 (string) current network name as defined in BIP70 (main, test, regtest)\n"
+            "  \"blocks\": xxxxxx,                  (numeric) the current number of blocks processed in the server\n"
+            "  \"headers\": xxxxxx,                 (numeric) the current number of headers we have validated\n"
+            "  \"bestblockhash\": \"...\",          (string) the hash of the currently best block\n"
+            "  \"difficulty\": xxxxxx,              (numeric) the current difficulty (-algo=<algo>, default: butkscrypt)\n"
+            "  \"difficulty_tip\": xxxxxx,          (numeric) the current difficulty for the tip\n"
+            "  \"difficulty_butkscrypt\": xxxxxx,   (numeric) the current difficulty for Butkscrypt\n"
+            "  \"difficulty_sha256d\": xxxxxx,      (numeric) the current difficulty for Sha256d\n"
+            "  \"difficulty_lyra2\": xxxxxx,        (numeric) the current difficulty for Lyra2\n"
+            "  \"difficulty_ghostrider\": xxxxxx,   (numeric) the current difficulty for Ghostrider\n"
+            "  \"difficulty_yespower\": xxxxxx,     (numeric) the current difficulty for Yespower\n"
+            "  \"difficulty_scrypt\": xxxxxx,       (numeric) the current difficulty for Scrypt\n"
+            "  \"mediantime\": xxxxxx,              (numeric) median time for the current best block\n"
+            "  \"verificationprogress\": xxxx,      (numeric) estimate of verification progress [0..1]\n"
+            "  \"chainwork\": \"xxxx\"              (string) total amount of work in active chain, in hexadecimal\n"
+            "  \"pruned\": xx,                      (boolean) if the blocks are subject to pruning\n"
+            "  \"pruneheight\": xxxxxx,             (numeric) lowest-height complete block stored\n"
+            "  \"softforks\": [                     (array) status of softforks in progress\n"
             "     {\n"
-            "        \"id\": \"xxxx\",        (string) name of softfork\n"
-            "        \"version\": xx,         (numeric) block version\n"
-            "        \"reject\": {            (object) progress toward rejecting pre-softfork blocks\n"
-            "           \"status\": xx,       (boolean) true if threshold reached\n"
+            "        \"id\": \"xxxx\",              (string) name of softfork\n"
+            "        \"version\": xx,               (numeric) block version\n"
+            "        \"reject\": {                  (object) progress toward rejecting pre-softfork blocks\n"
+            "           \"status\": xx,             (boolean) true if threshold reached\n"
             "        },\n"
             "     }, ...\n"
             "  ],\n"
@@ -1454,22 +1462,23 @@ UniValue getblockchaininfo(const JSONRPCRequest& request)
     obj.push_back(Pair("blocks",                (int)chainActive.Height()));
     obj.push_back(Pair("headers",               pindexBestHeader ? pindexBestHeader->nHeight : -1));
     obj.push_back(Pair("bestblockhash",         chainActive.Tip()->GetBlockHash().GetHex()));
-    obj.pushKV("pow_algo_id",           ALGO);
-    obj.pushKV("pow_algo",              GetAlgoName(ALGO));
-    obj.pushKV("difficulty",            GetDifficulty(ALGO));
-    obj.pushKV("difficulty_sha256d",        GetDifficulty(ALGO_SHA256D));
-    obj.pushKV("difficulty_butkscrypt",     GetDifficulty(ALGO_BUTKSCRYPT));
-    obj.pushKV("difficulty_scrypt",     GetDifficulty(ALGO_SCRYPT));
-    obj.pushKV("difficulty_yespower",    GetDifficulty(ALGO_YESPOWER));
-    obj.pushKV("difficulty_lyra2",    GetDifficulty(ALGO_LYRA2));
-    obj.pushKV("difficulty_ghostrider",      GetDifficulty(ALGO_GHOSTRIDER));
+    obj.pushKV("pow_algo_id",                   ALGO);
+    obj.pushKV("pow_algo",                      GetAlgoName(ALGO));
+    obj.pushKV("difficulty",                    GetDifficulty(ALGO));
+    obj.pushKV("difficulty_tip",                GetDifficulty(chainActive.Tip()));
+    obj.pushKV("difficulty_butkscrypt",         GetDifficulty(ALGO_BUTKSCRYPT));
+    obj.pushKV("difficulty_sha256d",            GetDifficulty(ALGO_SHA256D));
+    obj.pushKV("difficulty_lyra2",              GetDifficulty(ALGO_LYRA2));
+    obj.pushKV("difficulty_ghostrider",         GetDifficulty(ALGO_GHOSTRIDER));
+    obj.pushKV("difficulty_yespower",           GetDifficulty(ALGO_YESPOWER));
+    obj.pushKV("difficulty_scrypt",             GetDifficulty(ALGO_SCRYPT));
     obj.push_back(Pair("mediantime",            (int64_t)chainActive.Tip()->GetMedianTimePast()));
     obj.push_back(Pair("verificationprogress",  GuessVerificationProgress(Params().TxData(), chainActive.Tip())));
     obj.push_back(Pair("chainwork",             chainActive.Tip()->nChainWork.GetHex()));
     CCoinsStats stats;
     FlushStateToDisk();
     if (GetUTXOStats(pcoinsdbview, stats)) {
-    obj.push_back(Pair("total_amount", ValueFromAmount(stats.nTotalAmount)));
+        obj.push_back(Pair("total_amount",      ValueFromAmount(stats.nTotalAmount)));
     }
     obj.push_back(Pair("pruned",                fPruneMode));
 
@@ -1478,15 +1487,15 @@ UniValue getblockchaininfo(const JSONRPCRequest& request)
     UniValue softforks(UniValue::VARR);
     UniValue bip9_softforks(UniValue::VOBJ);
     // sorted by activation block
-//    softforks.push_back(SoftForkDesc("bip34", 2, tip, consensusParams));
-//    softforks.push_back(SoftForkDesc("bip66", 3, tip, consensusParams));
-//    softforks.push_back(SoftForkDesc("bip65", 4, tip, consensusParams));
+    // softforks.push_back(SoftForkDesc("bip34", 2, tip, consensusParams));
+    // softforks.push_back(SoftForkDesc("bip66", 3, tip, consensusParams));
+    // softforks.push_back(SoftForkDesc("bip65", 4, tip, consensusParams));
     // sorted by start time/bit
-//    BIP9SoftForkDescPushBack(bip9_softforks, "csv", consensusParams, Consensus::DEPLOYMENT_CSV);
-//    BIP9SoftForkDescPushBack(bip9_softforks, "dip0001", consensusParams, Consensus::DEPLOYMENT_DIP0001);
-//    BIP9SoftForkDescPushBack(bip9_softforks, "bip147", consensusParams, Consensus::DEPLOYMENT_BIP147);
-//    BIP9SoftForkDescPushBack(bip9_softforks, "dip0003", consensusParams, Consensus::DEPLOYMENT_DIP0003);
-//    BIP9SoftForkDescPushBack(bip9_softforks, "dip0008", consensusParams, Consensus::DEPLOYMENT_DIP0008);
+    // BIP9SoftForkDescPushBack(bip9_softforks, "csv", consensusParams, Consensus::DEPLOYMENT_CSV);
+    // BIP9SoftForkDescPushBack(bip9_softforks, "dip0001", consensusParams, Consensus::DEPLOYMENT_DIP0001);
+    // BIP9SoftForkDescPushBack(bip9_softforks, "bip147", consensusParams, Consensus::DEPLOYMENT_BIP147);
+    // BIP9SoftForkDescPushBack(bip9_softforks, "dip0003", consensusParams, Consensus::DEPLOYMENT_DIP0003);
+    // BIP9SoftForkDescPushBack(bip9_softforks, "dip0008", consensusParams, Consensus::DEPLOYMENT_DIP0008);
     obj.push_back(Pair("softforks",             softforks));
     obj.push_back(Pair("bip9_softforks", bip9_softforks));
 
