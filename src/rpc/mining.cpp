@@ -60,7 +60,7 @@ unsigned int ParseConfirmTarget(const UniValue& value)
  * or from the last difficulty change if 'lookup' is nonpositive.
  * If 'height' is nonnegative, compute the estimate at the time when a given block was found.
  */
-UniValue GetNetworkHashPS(int lookup, int height,int algo = ALGO) {
+UniValue GetNetworkHashPS(int lookup, int height, int algo = ALGO) {
     CBlockIndex *pb = GetLastBlockIndex4Algo(chainActive.Tip(), algo);
 
     if (height >= 0 && height < chainActive.Height())
@@ -114,7 +114,7 @@ UniValue getnetworkhashps(const JSONRPCRequest& request)
             "Pass in [blocks] to override # of blocks, -1 specifies since last difficulty change.\n"
             "Pass in [height] to estimate the network speed at the time when a certain block was found.\n"
             "\nArguments:\n"
-            "1. nblocks     (numeric, optional, default=120) The number of blocks, or -1 for blocks since last difficulty change.\n"
+            "1. nblocks     (numeric, optional, default=-1) The number of blocks, or -1 for blocks since last difficulty change.\n"
             "2. height      (numeric, optional, default=-1) To estimate at the time of the given height.\n"
             "\nResult:\n"
             "x             (numeric) Hashes per second estimated\n"
@@ -124,7 +124,9 @@ UniValue getnetworkhashps(const JSONRPCRequest& request)
        );
 
     LOCK(cs_main);
-    return GetNetworkHashPS(!request.params[0].isNull() ? request.params[0].get_int() : 120, !request.params[1].isNull() ? request.params[1].get_int() : -1);
+    int blocks = !request.params[0].isNull() ? request.params[0].get_int() : -1;
+    int height = !request.params[1].isNull() ? request.params[1].get_int() : -1;
+    return GetNetworkHashPS(blocks, height);
 }
 
 static UniValue getallnetworkhashps(const JSONRPCRequest& request)
@@ -152,7 +154,7 @@ static UniValue getallnetworkhashps(const JSONRPCRequest& request)
 
     LOCK(cs_main);
     int blocks = !request.params[0].isNull() ? request.params[0].get_int() : -1;
-    int height =  !request.params[1].isNull() ? request.params[1].get_int() : -1;
+    int height = !request.params[1].isNull() ? request.params[1].get_int() : -1;
     UniValue obj(UniValue::VOBJ);
     obj.pushKV("butkscrypt",    GetNetworkHashPS(blocks, height, ALGO_BUTKSCRYPT));
     obj.pushKV("sha256d",       GetNetworkHashPS(blocks, height, ALGO_SHA256D));

@@ -387,8 +387,9 @@ UniValue getdifficulty(const JSONRPCRequest& request)
         throw std::runtime_error(
             "getdifficulty\n"
             "\nReturns the proof-of-work difficulty as a multiple of the minimum difficulty.\n"
+            "The difficulty is calculated since last block mined with its algo.\n"
             "\nResult:\n"
-            "n.nnn       (numeric) the proof-of-work difficulty as a multiple of the minimum difficulty.\n"
+            "xxxxx      (numeric) the proof-of-work difficulty for (-algo=<algo>, default: butkscrypt).\n"
             "\nExamples:\n"
             + HelpExampleCli("getdifficulty", "")
             + HelpExampleRpc("getdifficulty", "")
@@ -396,6 +397,40 @@ UniValue getdifficulty(const JSONRPCRequest& request)
 
     LOCK(cs_main);
     return GetDifficulty(ALGO);
+}
+
+UniValue getdifficulties(const JSONRPCRequest& request)
+{
+    if (request.fHelp || request.params.size() != 0)
+        throw std::runtime_error(
+            "getdifficulties\n"
+            "\nReturns the proof-of-work difficulties as a multiple of the minimum difficulty.\n"
+            "Difficulties, except for the tip are calculated since last block mined with its algo.\n"
+            "\nResult:\n"
+            "xxxxx       (numeric) the pow difficulty for (-algo=<algo>, default: butkscrypt).\n"
+            "xxxxx       (numeric) the pow difficulty for the tip.\n"
+            "xxxxx       (numeric) the pow difficulty for Butkscrypt.\n"
+            "xxxxx       (numeric) the pow difficulty for Sha256d.\n"
+            "xxxxx       (numeric) the pow difficulty for Lyra2.\n"
+            "xxxxx       (numeric) the pow difficulty for Ghostrider.\n"
+            "xxxxx       (numeric) the pow difficulty for Yespower.\n"
+            "xxxxx       (numeric) the pow difficulty for Scrypt.\n"
+            "\nExamples:\n"
+            + HelpExampleCli("getdifficulties", "")
+            + HelpExampleRpc("getdifficulties", "")
+        );
+
+    LOCK(cs_main);
+    UniValue obj(UniValue::VOBJ);
+    obj.pushKV("difficulty",                    GetDifficulty(ALGO));
+    obj.pushKV("difficulty_tip",                GetDifficulty(chainActive.Tip()));
+    obj.pushKV("difficulty_butkscrypt",         GetDifficulty(ALGO_BUTKSCRYPT));
+    obj.pushKV("difficulty_sha256d",            GetDifficulty(ALGO_SHA256D));
+    obj.pushKV("difficulty_lyra2",              GetDifficulty(ALGO_LYRA2));
+    obj.pushKV("difficulty_ghostrider",         GetDifficulty(ALGO_GHOSTRIDER));
+    obj.pushKV("difficulty_yespower",           GetDifficulty(ALGO_YESPOWER));
+    obj.pushKV("difficulty_scrypt",             GetDifficulty(ALGO_SCRYPT));
+    return obj;
 }
 
 std::string EntryDescriptionString()
@@ -2240,6 +2275,7 @@ static const CRPCCommand commands[] =
     { "blockchain",         "getmerkleblocks",        &getmerkleblocks,        true,  {"filter","blockhash","count"} },
     { "blockchain",         "getchaintips",           &getchaintips,           true,  {"count","branchlen"} },
     { "blockchain",         "getdifficulty",          &getdifficulty,          true,  {} },
+    { "blockchain",         "getdifficulties",        &getdifficulties,        true,  {} },
     { "blockchain",         "getmempoolancestors",    &getmempoolancestors,    true,  {"txid","verbose"} },
     { "blockchain",         "getmempooldescendants",  &getmempooldescendants,  true,  {"txid","verbose"} },
     { "blockchain",         "getmempoolentry",        &getmempoolentry,        true,  {"txid"} },
