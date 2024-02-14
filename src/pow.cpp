@@ -54,27 +54,37 @@ unsigned int GetNextWorkRequired(const CBlockIndex* pindexLast, const Consensus:
     //Per-algo retarget
     int nAdjustments{0};
     nAdjustments = pindexPrevAlgo->nHeight + NUM_ALGOS - 1 - pindexLast->nHeight;
+    const arith_uint256 powLimit = UintToArith256(params.powLimit);
+    const auto multiplicator = 100 + params.nLocalTargetAdjustment;
 
     if (nAdjustments > 0)
     {
         for (int i = 0; i < nAdjustments; i++)
         {
+            if (bnNew > powLimit) {
+                bnNew = powLimit;
+                return bnNew.GetCompact();
+            }
             bnNew *= 100;
-            bnNew /= (100 + params.nLocalTargetAdjustment);
+            bnNew /= multiplicator;
         }
     }
     else if (nAdjustments < 0)
     {
         for (int i = 0; i < -nAdjustments; i++)
         {
-            bnNew *= (100 + params.nLocalTargetAdjustment);
+            if (bnNew > powLimit) {
+                bnNew = powLimit;
+                return bnNew.GetCompact();
+            }
+            bnNew *= multiplicator;
             bnNew /= 100;
         }
     }
 
-    if (bnNew > UintToArith256(params.powLimit))
-    {
-        bnNew = UintToArith256(params.powLimit);
+     // Double check.
+    if (bnNew > powLimit) {
+        bnNew = powLimit;
     }
 
     return bnNew.GetCompact();
