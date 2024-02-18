@@ -80,7 +80,7 @@ extern double NSAppKitVersionNumber;
 namespace GUIUtil {
 
 // The theme to set by default if settings are missing or incorrect
-static const QString defaultTheme = "Light";
+static const QString defaultTheme = "Dark";
 // The prefix a theme name should have if we want to apply dark colors and styles to it
 static const QString darkThemePrefix = "Dark";
 
@@ -109,7 +109,7 @@ static const std::map<ThemedColor, QColor> themedDarkColors = {
 static const std::map<ThemedStyle, QString> themedStyles = {
     { ThemedStyle::TS_INVALID, "background:#FF8080;" },
     { ThemedStyle::TS_ERROR, "color:red;" },
-    { ThemedStyle::TS_SUCCESS, "color:green;" },
+    { ThemedStyle::TS_SUCCESS, "color:gold;" },
     { ThemedStyle::TS_COMMAND, "color:#006060;" },
     { ThemedStyle::TS_PRIMARY, "color:black;" },
     { ThemedStyle::TS_SECONDARY, "color:#808080;" },
@@ -118,7 +118,7 @@ static const std::map<ThemedStyle, QString> themedStyles = {
 static const std::map<ThemedStyle, QString> themedDarkStyles = {
     { ThemedStyle::TS_INVALID, "background:#ff4500;" },
     { ThemedStyle::TS_ERROR, "color:#ff4500;" },
-    { ThemedStyle::TS_SUCCESS, "color:green;" },
+    { ThemedStyle::TS_SUCCESS, "color:gold;" },
     { ThemedStyle::TS_COMMAND, "color:#0cc;" },
     { ThemedStyle::TS_PRIMARY, "color:#ccc;" },
     { ThemedStyle::TS_SECONDARY, "color:#aaa;" },

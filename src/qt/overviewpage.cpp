@@ -369,8 +369,8 @@ void OverviewPage::updatePrivateSendProgress()
         strAmountAndRounds = strPrivateSendAmount + " / " + tr("%n Rounds", "", privateSendClient.nPrivateSendRounds);
     } else {
         QString strMaxToAnonymize = BitcoinUnits::formatHtmlWithUnit(nDisplayUnit, nMaxToAnonymize, false, BitcoinUnits::separatorAlways);
-        ui->labelAmountRounds->setToolTip(tr("Not enough compatible inputs to anonymize <span style='color:green;'>%1</span>,<br>"
-                                             "will anonymize <span style='color:green;'>%2</span> instead")
+        ui->labelAmountRounds->setToolTip(tr("Not enough compatible inputs to anonymize <span style='color:gold;'>%1</span>,<br>"
+                                             "will anonymize <span style='color:gold;'>%2</span> instead")
                                           .arg(strPrivateSendAmount)
                                           .arg(strMaxToAnonymize));
         strMaxToAnonymize = strMaxToAnonymize.remove(strMaxToAnonymize.indexOf("."), BitcoinUnits::decimals(nDisplayUnit) + 1);
@@ -493,7 +493,7 @@ void OverviewPage::privateSendStatus()
         if(settings.value("fLowKeysWarning").toBool()) {
             QString strWarn =   tr("Very low number of keys left since last automatic backup!") + "<br><br>" +
                                 tr("We are about to create a new automatic backup for you, however "
-                                   "<span style='color:green;'> you should always make sure you have backups "
+                                   "<span style='color:gold;'> you should always make sure you have backups "
                                    "saved in some safe place</span>!") + "<br><br>" +
                                 tr("Note: You can turn this message off in options.");
             ui->labelPrivateSendEnabled->setToolTip(strWarn);
