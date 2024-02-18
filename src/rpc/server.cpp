@@ -307,7 +307,7 @@ UniValue stop(const JSONRPCRequest& jsonRequest)
     if (jsonRequest.params[0].isNum()) {
         MilliSleep(jsonRequest.params[0].get_int());
     }
-    return "ButKoin server stopping";
+    return "Butkoin Gold server stopping";
 }
 
 UniValue uptime(const JSONRPCRequest& jsonRequest)

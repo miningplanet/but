@@ -13,7 +13,7 @@
  * for both butd and but-qt, to make it harder for attackers to
  * target servers or GUI users specifically.
  */
-const std::string CLIENT_NAME("ButKoin Core Green");
+const std::string CLIENT_NAME("Butkoin Core Gold");
 
 /**
  * Client version number
