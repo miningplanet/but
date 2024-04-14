@@ -121,7 +121,7 @@ CAmount AmountFromValue(const UniValue& value)
     CAmount amount;
     if (!ParseFixedPoint(value.getValStr(), 8, &amount))
         throw JSONRPCError(RPC_TYPE_ERROR, "Invalid amount");
-    if (!MoneyRange(amount, Params().IsMaxCash(chainActive.Tip())))
+    if (!MoneyRange(amount))
         throw JSONRPCError(RPC_TYPE_ERROR, "Amount out of range");
     return amount;
 }

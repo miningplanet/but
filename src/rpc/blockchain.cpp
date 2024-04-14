@@ -2046,7 +2046,6 @@ static UniValue getblockstats(const JSONRPCRequest& request)
     std::vector<CAmount> fee_array;
     std::vector<CAmount> feerate_array;
     std::vector<int64_t> txsize_array;
-    bool ismaxcash = Params().IsMaxCash(chainActive.Tip());
 
     for (const auto& tx : block.vtx) {
         outputs += tx->vout.size();
@@ -2098,7 +2097,7 @@ static UniValue getblockstats(const JSONRPCRequest& request)
             }
 
             CAmount txfee = tx_total_in - tx_total_out;
-            assert(MoneyRange(txfee, ismaxcash));
+            assert(MoneyRange(txfee));
             if (do_medianfee) {
                 fee_array.push_back(txfee);
             }

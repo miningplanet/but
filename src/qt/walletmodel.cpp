@@ -346,13 +346,11 @@ WalletModel::SendCoinsReturn WalletModel::prepareTransaction(WalletModelTransact
     }
 
     if(fCreated){
-        if(!Params().IsMaxCash(chainActive.Tip())){
-            CAmount subtotal = total + nChangeValue;
-            if(!fSubtractFeeFromAmount)
-                subtotal += nFeeRequired;
-            if (subtotal > OLD_MAX_MONEY){
-                return AmountExceedsmaxmoney;
-            }
+        CAmount subtotal = total + nChangeValue;
+        if(!fSubtractFeeFromAmount)
+            subtotal += nFeeRequired;
+        if (subtotal > MAX_MONEY){
+            return AmountExceedsmaxmoney;
         }
     }
     else

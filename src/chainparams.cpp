@@ -448,7 +448,6 @@ public:
         consensus.nMaxAdjustUp = 10; // 10% adjustment up
         consensus.nMinActualTimespan = consensus.nAveragingTargetTimespan * (100 - consensus.nMaxAdjustUp) / 100;
         consensus.nMaxActualTimespan = consensus.nAveragingTargetTimespan * (100 + consensus.nMaxAdjustDown) / 100;
-        consensus.nMaxCash = 400000;
         consensus.nLocalTargetAdjustment = 4; // target adjustment per algo
         consensus.nLocalDifficultyAdjustment = 4; // unused: difficulty adjustment per algo
 
@@ -614,7 +613,6 @@ public:
         consensus.nMaxAdjustUp = 10; // 10% adjustment up
         consensus.nMinActualTimespan = consensus.nAveragingTargetTimespan * (100 - consensus.nMaxAdjustUp) / 100;
         consensus.nMaxActualTimespan = consensus.nAveragingTargetTimespan * (100 + consensus.nMaxAdjustDown) / 100;
-        consensus.nMaxCash = 200;
 
         consensus.nLocalTargetAdjustment = 4; // target adjustment per algo
         consensus.nLocalDifficultyAdjustment = 4; // unused: difficulty adjustment per algo
@@ -759,7 +757,6 @@ public:
         consensus.nMinActualTimespan = consensus.nAveragingTargetTimespan * (100 - consensus.nMaxAdjustUp) / 100;
         consensus.nMaxActualTimespan = consensus.nAveragingTargetTimespan * (100 + consensus.nMaxAdjustDown) / 100;
 
-        consensus.nMaxCash = 100;
         consensus.nLocalTargetAdjustment = 4; // target adjustment per algo
         consensus.nLocalDifficultyAdjustment = 4; // unused: difficulty adjustment per algo
 
@@ -890,7 +887,7 @@ public:
         consensus.nMaxAdjustUp = 10; // 10% adjustment up
         consensus.nMinActualTimespan = consensus.nAveragingTargetTimespan * (100 - consensus.nMaxAdjustUp) / 100;
         consensus.nMaxActualTimespan = consensus.nAveragingTargetTimespan * (100 + consensus.nMaxAdjustDown) / 100;
-        consensus.nMaxCash = 100;
+
         consensus.nLocalTargetAdjustment = 4; // target adjustment per algo
         consensus.nLocalDifficultyAdjustment = 4; // unused: difficulty adjustment per algo
 
