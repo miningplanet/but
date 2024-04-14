@@ -10,6 +10,7 @@
 #include <chainparams.h>
 #include <primitives/block.h>
 #include <uint256.h>
+#include <util.h>
 
 #include <math.h>
 
@@ -54,28 +55,42 @@ unsigned int GetNextWorkRequired(const CBlockIndex* pindexLast, const Consensus:
     //Per-algo retarget
     int nAdjustments{0};
     nAdjustments = pindexPrevAlgo->nHeight + NUM_ALGOS - 1 - pindexLast->nHeight;
-    const arith_uint256 powLimit = UintToArith256(params.powLimit);
+    const auto powLimit = UintToArith256(params.powLimit);
     const auto multiplicator = 100 + params.nLocalTargetAdjustment;
 
+    
+    // Done by ChatGPT 3.5
+    // if (nAdjustments > 0) {
+    //     int64_t factor = static_cast<int64_t>(std::pow(multiplicator, nAdjustments));
+    //     int64_t denominator = static_cast<int64_t>(std::pow(100, nAdjustments));
+    //     bnNew = (bnNew * factor) / denominator;
+    // } else if (nAdjustments < 0) {
+    //     int64_t power = -nAdjustments;
+    //     int64_t factor = static_cast<int64_t>(std::pow(104, power));
+    //     int64_t denominator = static_cast<int64_t>(std::pow(100, power));
+    //     bnNew = (bnNew * factor) / denominator;
+    // }
     if (nAdjustments > 0)
     {
         for (int i = 0; i < nAdjustments; i++)
         {
             if (bnNew > powLimit) {
                 bnNew = powLimit;
-                return bnNew.GetCompact();
+                // return bnNew.GetCompact();
+                break;
             }
             bnNew *= 100;
             bnNew /= multiplicator;
         }
     }
-    else if (nAdjustments < 0)
+    if (nAdjustments < 0)
     {
         for (int i = 0; i < -nAdjustments; i++)
         {
             if (bnNew > powLimit) {
                 bnNew = powLimit;
-                return bnNew.GetCompact();
+                // return bnNew.GetCompact();
+                break;
             }
             bnNew *= multiplicator;
             bnNew /= 100;
@@ -87,7 +102,9 @@ unsigned int GetNextWorkRequired(const CBlockIndex* pindexLast, const Consensus:
         bnNew = powLimit;
     }
 
-    return bnNew.GetCompact();
+    const uint32_t result = bnNew.GetCompact();
+    LogPrintf("Calc next work (adjust=%d, powLimit=%d): %d\n", nAdjustments, powLimit.GetCompact(), result);
+    return result;
 }
 
 bool CheckProofOfWork(uint256 hash, unsigned int nBits, const Consensus::Params& params)
