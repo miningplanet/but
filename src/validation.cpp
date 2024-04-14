@@ -1013,44 +1013,57 @@ NOTE:   unlike bitcoin we are using PREVIOUS block height here,
         might be a good idea to change this to use prev bits
         but current height to avoid confusion.
 */
-CAmount GetBlockSubsidy(int nPrevBits, int nPrevHeight, const Consensus::Params& consensusParams, bool fSuperblockPartOnly)
+// CAmount GetBlockSubsidy(int nPrevBits, int nPrevHeight, const Consensus::Params& consensusParams, bool fSuperblockPartOnly)
+// {
+// 	double nSubsidy = 5000; // (declaring the reward variable and its original/default amount)
+// 	const short owlings = 21262; // amount of blocks between 2 owlings
+// 	int multiplier; // integer number of owlings
+// 	int tempHeight; // number of blocks since last anchor
+// 	if (nPrevHeight < 329) {
+// 		nSubsidy = 5000000;
+//         } else if (nPrevHeight < 721) {
+//                 nSubsidy = 4;
+// 	} else if ( (nPrevHeight > 553531) && (nPrevHeight < 2105657) ){
+// 		tempHeight = nPrevHeight - 553532;
+// 		multiplier = tempHeight / owlings;
+// 		nSubsidy -= (multiplier*10 +10);
+// 	} else if ( (nPrevHeight > 2105657) && (nPrevHeight < 5273695) ) {
+// 		tempHeight = nPrevHeight - 2105658;
+// 		multiplier = tempHeight / owlings;
+// 		nSubsidy -= (multiplier*20 + 750);
+// 	} else if ( (nPrevHeight > 5273695) && (nPrevHeight < 7378633) ) {
+// 		tempHeight = nPrevHeight - 5273696;
+// 		multiplier = tempHeight / owlings;
+// 		nSubsidy -= (multiplier*10 + 3720);
+// 	} else if ( (nPrevHeight > 7378633) && (nPrevHeight < 8399209) ){
+// 		tempHeight = nPrevHeight - 7378634;
+// 		multiplier = tempHeight / owlings;
+// 		nSubsidy -= (multiplier * 5 + 4705);
+// 	} else if ( (nPrevHeight > 8399209) && (nPrevHeight < 14735285) ){
+// 		nSubsidy = 55;
+// 	} else if ( (nPrevHeight > 14735285) && (nPrevHeight < 15798385) ){
+// 	   tempHeight = nPrevHeight - 14735286;
+// 	   multiplier = tempHeight / owlings;
+// 	   nSubsidy -= (multiplier + 4946);
+// 	} else if ( (nPrevHeight > 15798385) && (nPrevHeight < 25844304) ){
+// 		nSubsidy = 5;
+// 	} else if (nPrevHeight > 125844304) {
+// 		nSubsidy = 0.001;
+// 	}
+// 	return nSubsidy * COIN;
+// }
+
+CAmount GetBlockSubsidy(int nPrevBits, int nHeight, const Consensus::Params& consensusParams, bool fSuperblockPartOnly)
 {
-	double nSubsidy = 5000; // (declaring the reward variable and its original/default amount)
-	const short owlings = 21262; // amount of blocks between 2 owlings
-	int multiplier; // integer number of owlings
-	int tempHeight; // number of blocks since last anchor
-	if (nPrevHeight < 329) {
-		nSubsidy = 5000000;
-        } else if (nPrevHeight < 721) {
-                nSubsidy = 4;
-	} else if ( (nPrevHeight > 553531) && (nPrevHeight < 2105657) ){
-		tempHeight = nPrevHeight - 553532;
-		multiplier = tempHeight / owlings;
-		nSubsidy -= (multiplier*10 +10);
-	} else if ( (nPrevHeight > 2105657) && (nPrevHeight < 5273695) ) {
-		tempHeight = nPrevHeight - 2105658;
-		multiplier = tempHeight / owlings;
-		nSubsidy -= (multiplier*20 + 750);
-	} else if ( (nPrevHeight > 5273695) && (nPrevHeight < 7378633) ) {
-		tempHeight = nPrevHeight - 5273696;
-		multiplier = tempHeight / owlings;
-		nSubsidy -= (multiplier*10 + 3720);
-	} else if ( (nPrevHeight > 7378633) && (nPrevHeight < 8399209) ){
-		tempHeight = nPrevHeight - 7378634;
-		multiplier = tempHeight / owlings;
-		nSubsidy -= (multiplier * 5 + 4705);
-	} else if ( (nPrevHeight > 8399209) && (nPrevHeight < 14735285) ){
-		nSubsidy = 55;
-	} else if ( (nPrevHeight > 14735285) && (nPrevHeight < 15798385) ){
-	   tempHeight = nPrevHeight - 14735286;
-	   multiplier = tempHeight / owlings;
-	   nSubsidy -= (multiplier + 4946);
-	} else if ( (nPrevHeight > 15798385) && (nPrevHeight < 25844304) ){
-		nSubsidy = 5;
-	} else if (nPrevHeight > 125844304) {
-		nSubsidy = 0.001;
-	}
-	return nSubsidy * COIN;
+    int halvings = nHeight / consensusParams.nSubsidyHalvingInterval;
+    // Force block reward to zero when right shift is undefined.
+    if (halvings >= 64)
+        return 0;
+
+    CAmount nSubsidy = 50 * COIN;
+    // Subsidy is cut in half every 210,000 blocks which will occur approximately every 4 years.
+    nSubsidy >>= halvings;
+    return nSubsidy;
 }
 
 CAmount GetSmartnodePayment(int nHeight, CAmount blockValue)
