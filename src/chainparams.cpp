@@ -5,22 +5,20 @@
 // Copyright (c)      2020 The Pyrk developers
 // Copyright (c)      2020 The Raptoreum developers
 // Copyright (c)      2021 The Butcore developers
+// Copyright (c) 2023-2024 mining@planet.ms (but project)
 
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include <chainparams.h>
 #include <consensus/merkle.h>
-
 #include <tinyformat.h>
 #include <util.h>
 #include <utilstrencodings.h>
-
 #include <arith_uint256.h>
-
 #include <assert.h>
-
 #include <chainparamsseeds.h>
+
 static size_t lastCheckMnCount = 0;
 static int lastCheckHeight= 0;
 static int isPrintedHeight = 0;
@@ -88,7 +86,6 @@ static CBlock CreateGenesisBlock(uint32_t nTime, uint32_t nNonce, uint32_t nBits
     return CreateGenesisBlock(pszTimestamp, genesisOutputScript, nTime, nNonce, nBits, nVersion, genesisReward);
 }
 
-
 void CChainParams::UpdateVersionBitsParameters(Consensus::DeploymentPos d, int64_t nStartTime, int64_t nTimeout, int64_t nWindowSize, int64_t nThreshold)
 {
     consensus.vDeployments[d].nStartTime = nStartTime;
@@ -100,12 +97,6 @@ void CChainParams::UpdateVersionBitsParameters(Consensus::DeploymentPos d, int64
             consensus.vDeployments[d].nThreshold = nThreshold;
     }
 }
-
-//void CChainParams::UpdateDIP3Parameters(int nActivationHeight, int nEnforcementHeight)
-//{
-//    consensus.DIP0003Height = nActivationHeight;
-//    consensus.DIP0003EnforcementHeight = nEnforcementHeight;
-//}
 
 void CChainParams::UpdateBudgetParameters(int nSmartnodePaymentsStartBlock, int nBudgetPaymentsStartBlock, int nSuperblockStartBlock)
 {
@@ -402,14 +393,13 @@ static Consensus::LLMQParams llmq400_85 = {
 /**
  * Main network
  */
+
 /**
  * What makes a good checkpoint block?
  * + Is surrounded by blocks with reasonable timestamps
- *   (no blocks before with a timestamp after, none after with
- *    timestamp before)
+ *   (no blocks before with a timestamp after, none after with timestamp before)
  * + Contains no strange transactions
  */
-
 
 class CMainParams : public CChainParams {
 public:
@@ -436,9 +426,7 @@ public:
         consensus.BIP65Enabled = true;
         consensus.BIP66Enabled = true;
         consensus.DIP0001Enabled = true;
-        consensus.DIP0003Enabled = true;
         consensus.DIP0008Enabled = true;
-        // consensus.DIP0003EnforcementHeight = 1047200;
         consensus.powLimit = uint256S("00ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"); // ~uint256(0) >> 20
         consensus.nPowTargetTimespan = 60; // But: 1 minutes
         consensus.nPowTargetSpacing =  60; // But: 1 minutes
@@ -512,9 +500,11 @@ public:
 
         // But BIP44 coin type is '630'
         nExtCoinType = 630;
+
         // 5% founder/dev fee forever
         vector<FounderRewardStructure> rewardStructures = { {INT_MAX, 5} };
         consensus.nFounderPayment = FounderPayment(rewardStructures, 250);
+        
         consensus.nCollaterals = SmartnodeCollaterals(
 			{
 				{150000, 6000000 * COIN},
@@ -602,10 +592,8 @@ public:
         consensus.BIP65Enabled = true; // 0000039cf01242c7f921dcb4806a5994bc003b48c1973ae0c89b67809c2bb2ab
         consensus.BIP66Enabled = true; // 0000002acdd29a14583540cb72e1c5cc83783560e38fa7081495d474fe1671f7
         consensus.DIP0001Enabled = true;
-        consensus.DIP0003Enabled = true;
         consensus.BIPCSVEnabled = true;
         consensus.BIP147Enabled = true;
-        // consensus.DIP0003EnforcementHeight = 7300;
         consensus.powLimit = uint256S("00ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"); // ~uint256(0) >> 20
         consensus.nAveragingInterval = 10; // 10 blocks
         consensus.nAveragingTargetTimespan = consensus.nAveragingInterval * 90 * 4; // 10 * NUM_ALGOS * 90
@@ -709,11 +697,10 @@ public:
 
         chainTxData = ChainTxData{
             1574164251, // * UNIX timestamp of last known number of transactions (Block 213054)
-            0,    // * total number of transactions between genesis and that timestamp
+            0,          // * total number of transactions between genesis and that timestamp
                         //   (the tx=... number in the SetBestChain debug.log lines)
-            0        // * estimated number of transactions per second after that timestamp
+            0           // * estimated number of transactions per second after that timestamp
         };
-
     }
 };
 
@@ -745,8 +732,6 @@ public:
         consensus.BIP65Enabled = true; // BIP65 activated immediately on devnet
         consensus.BIP66Enabled = true; // BIP66 activated immediately on devnet
         consensus.DIP0001Enabled = true; // DIP0001 activated immediately on devnet
-        consensus.DIP0003Enabled = true; // DIP0003 activated immediately on devnet
-        // consensus.DIP0003EnforcementHeight = 2; // DIP0003 activated immediately on devnet
         consensus.powLimit = uint256S("7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"); // ~uint256(0) >> 1
         consensus.nPowTargetTimespan = 60; // But: 1 minutes
         consensus.nPowTargetSpacing = 60; // But: 1 minutes
@@ -876,8 +861,6 @@ public:
         consensus.BIP65Enabled = true; // BIP65 activated on regtest (Used in rpc activation tests)
         consensus.BIP66Enabled = true; // BIP66 activated on regtest (Used in rpc activation tests)
         consensus.DIP0001Enabled = true;
-        consensus.DIP0003Enabled = true;
-        // consensus.DIP0003EnforcementHeight = 500;
         consensus.powLimit = uint256S("7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"); // ~uint256(0) >> 1
         consensus.nPowTargetTimespan = 60; // But: 1 day
         consensus.nPowTargetSpacing =  60; // But: 2.5 minutes
@@ -936,6 +919,7 @@ public:
         // privKey: cP4EKFyJsHT39LDqgdcB43Y3YXjNyjb5Fuas1GQSeAtjnZWmZEQK
         vSporkAddresses = {"yj949n1UH6fDhw6HtVE5VMj2iSTaSWBMcW"};
         nMinSporkKeys = 1;
+
         // regtest usually has no smartnodes in most tests, so don't check for upgraged MNs
         fBIP9CheckSmartnodesUpgraded = false;
         vector<FounderRewardStructure> rewardStructures = {  {INT_MAX, 5}// 5% founder/dev fee forever
@@ -1006,11 +990,6 @@ void UpdateVersionBitsParameters(Consensus::DeploymentPos d, int64_t nStartTime,
 {
     globalChainParams->UpdateVersionBitsParameters(d, nStartTime, nTimeout, nWindowSize, nThreshold);
 }
-
-//void UpdateDIP3Parameters(int nActivationHeight, int nEnforcementHeight)
-//{
-//    globalChainParams->UpdateDIP3Parameters(nActivationHeight, nEnforcementHeight);
-//}
 
 void UpdateBudgetParameters(int nSmartnodePaymentsStartBlock, int nBudgetPaymentsStartBlock, int nSuperblockStartBlock)
 {

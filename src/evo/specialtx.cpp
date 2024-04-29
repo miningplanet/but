@@ -23,11 +23,6 @@ bool CheckSpecialTx(const CTransaction& tx, const CBlockIndex* pindexPrev, CVali
     if (tx.nVersion != 3 || tx.nType == TRANSACTION_NORMAL)
         return true;
 
-    if (!Params().GetConsensus().DIP0003Enabled) {
-    	std::cout << "fail to check DIP0003Enabled\n";
-        return state.DoS(10, false, REJECT_INVALID, "bad-tx-type");
-    }
-
     switch (tx.nType) {
     case TRANSACTION_PROVIDER_REGISTER:
         return CheckProRegTx(tx, pindexPrev, state);

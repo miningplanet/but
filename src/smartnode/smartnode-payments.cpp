@@ -355,14 +355,8 @@ bool CSmartnodePayments::GetBlockTxOuts(int nBlockHeight, CAmount blockReward, s
     return true;
 }
 
-
 bool CSmartnodePayments::IsTransactionValid(const CTransaction& txNew, int nBlockHeight, CAmount blockReward) const
 {
-    if (!deterministicMNManager->IsDIP3Enforced(nBlockHeight)) {
-        // can't verify historical blocks here
-        return true;
-    }
-
     std::vector<CTxOut> voutSmartnodePayments;
     if (!GetBlockTxOuts(nBlockHeight, blockReward, voutSmartnodePayments)) {
         LogPrintf("CSmartnodePayments::%s -- WARN failed to get payees for block at height %s\n", __func__, nBlockHeight);

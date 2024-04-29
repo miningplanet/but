@@ -66,8 +66,6 @@ void CActiveSmartnodeManager::Init()
 
     if (!fSmartnodeMode) return;
 
-    if (!deterministicMNManager->IsDIP3Enforced()) return;
-
     // Check that our local network configuration is correct
     if (!fListen) {
         // listen option is probably overwritten by smth else, no good
@@ -132,8 +130,6 @@ void CActiveSmartnodeManager::UpdatedBlockTip(const CBlockIndex* pindexNew, cons
     LOCK(cs_main);
 
     if (!fSmartnodeMode) return;
-
-    if (!deterministicMNManager->IsDIP3Enforced(pindexNew->nHeight)) return;
 
     if (state == SMARTNODE_READY) {
         auto oldMNList = deterministicMNManager->GetListForBlock(pindexNew->pprev);

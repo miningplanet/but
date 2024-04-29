@@ -147,11 +147,8 @@ struct Params {
     bool BIP66Enabled;
     /** Block height at which DIP0001 becomes active */
     bool DIP0001Enabled;
-    /** Block height at which DIP0003 becomes active */
-    bool DIP0003Enabled;
+    /** Block height at which DIP0008 becomes active */
     bool DIP0008Enabled;
-    /** Block height at which DIP0003 becomes enforced */
-    //int DIP0003EnforcementHeight;
     /**
      * Minimum blocks including miner confirmation of the total of nMinerConfirmationWindow blocks in a retargeting period,
      * (nPowTargetTimespan / nPowTargetSpacing) which is also used for BIP9 deployments.

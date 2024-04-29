@@ -145,7 +145,6 @@ std::unique_ptr<CBlockTemplate> BlockAssembler::CreateNewBlock(const CScript& sc
     CBlockIndex* pindexPrev = chainActive.Tip();
     nHeight = pindexPrev->nHeight + 1;
 
-    bool fDIP0003Active_context = chainparams.GetConsensus().DIP0003Enabled;
     bool fDIP0008Active_context = chainparams.GetConsensus().DIP0008Enabled;
 
     pblock->nVersion = ComputeBlockVersion(pindexPrev, chainparams.GetConsensus(),algo, chainparams.BIP9CheckSmartnodesUpgraded());
@@ -161,16 +160,14 @@ std::unique_ptr<CBlockTemplate> BlockAssembler::CreateNewBlock(const CScript& sc
                        ? nMedianTimePast
                        : pblock->GetBlockTime();
 
-    if (fDIP0003Active_context) {
-        for (auto& p : chainparams.GetConsensus().llmqs) {
-            CTransactionRef qcTx;
-            if (llmq::quorumBlockProcessor->GetMinableCommitmentTx(p.first, nHeight, qcTx)) {
-                pblock->vtx.emplace_back(qcTx);
-                pblocktemplate->vTxFees.emplace_back(0);
-                pblocktemplate->vTxSigOps.emplace_back(0);
-                nBlockSize += qcTx->GetTotalSize();
-                ++nBlockTx;
-            }
+    for (auto& p : chainparams.GetConsensus().llmqs) {
+        CTransactionRef qcTx;
+        if (llmq::quorumBlockProcessor->GetMinableCommitmentTx(p.first, nHeight, qcTx)) {
+            pblock->vtx.emplace_back(qcTx);
+            pblocktemplate->vTxFees.emplace_back(0);
+            pblocktemplate->vTxSigOps.emplace_back(0);
+            nBlockSize += qcTx->GetTotalSize();
+            ++nBlockTx;
         }
     }
 
@@ -197,29 +194,27 @@ std::unique_ptr<CBlockTemplate> BlockAssembler::CreateNewBlock(const CScript& sc
     // Compute regular coinbase transaction.
     coinbaseTx.vout[0].nValue = blockReward;
 
-    if (!fDIP0003Active_context) {
-        coinbaseTx.vin[0].scriptSig = CScript() << nHeight << OP_0;
-    } else {
-        coinbaseTx.vin[0].scriptSig = CScript() << OP_RETURN;
+    {
+    coinbaseTx.vin[0].scriptSig = CScript() << OP_RETURN;
 
-        coinbaseTx.nVersion = 3;
-        coinbaseTx.nType = TRANSACTION_COINBASE;
+    coinbaseTx.nVersion = 3;
+    coinbaseTx.nType = TRANSACTION_COINBASE;
 
-        CCbTx cbTx;
-        cbTx.nVersion = 2;
-        cbTx.nHeight = nHeight;
+    CCbTx cbTx;
+    cbTx.nVersion = 2;
+    cbTx.nHeight = nHeight;
 
-        CValidationState state;
-        if (!CalcCbTxMerkleRootMNList(*pblock, pindexPrev, cbTx.merkleRootMNList, state)) {
-            throw std::runtime_error(strprintf("%s: CalcCbTxMerkleRootMNList failed: %s", __func__, FormatStateMessage(state)));
+    CValidationState state;
+    if (!CalcCbTxMerkleRootMNList(*pblock, pindexPrev, cbTx.merkleRootMNList, state)) {
+        throw std::runtime_error(strprintf("%s: CalcCbTxMerkleRootMNList failed: %s", __func__, FormatStateMessage(state)));
+    }
+    if (fDIP0008Active_context) {
+        if (!CalcCbTxMerkleRootQuorums(*pblock, pindexPrev, cbTx.merkleRootQuorums, state)) {
+            throw std::runtime_error(strprintf("%s: CalcCbTxMerkleRootQuorums failed: %s", __func__, FormatStateMessage(state)));
         }
-        if (fDIP0008Active_context) {
-            if (!CalcCbTxMerkleRootQuorums(*pblock, pindexPrev, cbTx.merkleRootQuorums, state)) {
-                throw std::runtime_error(strprintf("%s: CalcCbTxMerkleRootQuorums failed: %s", __func__, FormatStateMessage(state)));
-            }
-        }
-        LogPrintf("cbTx.merkleRootQuorums %s\n", cbTx.merkleRootQuorums.GetHex().c_str());
-        SetTxPayload(coinbaseTx, cbTx);
+    }
+    LogPrintf("cbTx.merkleRootQuorums %s\n", cbTx.merkleRootQuorums.GetHex().c_str());
+    SetTxPayload(coinbaseTx, cbTx);
     }
 
     // Update coinbase transaction with additional info about smartnode and governance payments,

@@ -121,12 +121,6 @@ bool CQuorumBlockProcessor::ProcessBlock(const CBlock& block, const CBlockIndex*
 {
     AssertLockHeld(cs_main);
 
-    bool fDIP0003Active = Params().GetConsensus().DIP0003Enabled;
-    if (!fDIP0003Active) {
-        evoDb.Write(DB_BEST_BLOCK_UPGRADE, block.GetHash());
-        return true;
-    }
-
     std::map<Consensus::LLMQType, CFinalCommitment> qcs;
     if (!GetCommitmentsFromBlock(block, pindex, qcs, state)) {
         return false;
@@ -311,7 +305,6 @@ bool CQuorumBlockProcessor::GetCommitmentsFromBlock(const CBlock& block, const C
     AssertLockHeld(cs_main);
 
     auto& consensus = Params().GetConsensus();
-    bool fDIP0003Active = consensus.DIP0003Enabled;
 
     ret.clear();
 
@@ -332,11 +325,6 @@ bool CQuorumBlockProcessor::GetCommitmentsFromBlock(const CBlock& block, const C
             ret.emplace((Consensus::LLMQType)qc.commitment.llmqType, std::move(qc.commitment));
         }
     }
-
-    if (!fDIP0003Active && !ret.empty()) {
-        return state.DoS(100, false, REJECT_INVALID, "bad-qc-premature");
-    }
-
     return true;
 }
 

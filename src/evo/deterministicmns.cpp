@@ -519,10 +519,6 @@ bool CDeterministicMNManager::ProcessBlock(const CBlock& block, const CBlockInde
     AssertLockHeld(cs_main);
 
     const auto& consensusParams = Params().GetConsensus();
-    bool fDIP0003Active = consensusParams.DIP0003Enabled;
-    if (!fDIP0003Active) {
-        return true;
-    }
 
     CDeterministicMNList oldList, newList;
     CDeterministicMNListDiff diff;
@@ -559,16 +555,7 @@ bool CDeterministicMNManager::ProcessBlock(const CBlock& block, const CBlockInde
         GetMainSignals().NotifySmartnodeListChanged(false, oldList, diff);
         uiInterface.NotifySmartnodeListChanged(newList);
     }
-
-//    if (nHeight == consensusParams.DIP0003EnforcementHeight) {
-//        if (!consensusParams.DIP0003EnforcementHash.IsNull() && consensusParams.DIP0003EnforcementHash != pindex->GetBlockHash()) {
-//            LogPrintf("CDeterministicMNManager::%s -- DIP3 enforcement block has wrong hash: hash=%s, expected=%s, nHeight=%d\n", __func__,
-//                    pindex->GetBlockHash().ToString(), consensusParams.DIP0003EnforcementHash.ToString(), nHeight);
-//            return _state.DoS(100, false, REJECT_INVALID, "bad-dip3-enf-block");
-//        }
-//        LogPrintf("CDeterministicMNManager::%s -- DIP3 is enforced now. nHeight=%d\n", __func__, nHeight);
-//    }
-
+    
     LOCK(cs);
     CleanupCache(nHeight);
 
@@ -604,11 +591,6 @@ bool CDeterministicMNManager::UndoBlock(const CBlock& block, const CBlockIndex* 
         GetMainSignals().NotifySmartnodeListChanged(true, curList, inversedDiff);
         uiInterface.NotifySmartnodeListChanged(prevList);
     }
-
-    const auto& consensusParams = Params().GetConsensus();
-//    if (nHeight == consensusParams.DIP0003EnforcementHeight) {
-//        LogPrintf("CDeterministicMNManager::%s -- DIP3 is not enforced anymore. nHeight=%d\n", __func__, nHeight);
-//    }
 
     return true;
 }
@@ -990,17 +972,6 @@ bool CDeterministicMNManager::IsProTxWithCollateral(const CTransactionRef& tx, u
     return true;
 }
 
-bool CDeterministicMNManager::IsDIP3Enforced(int nHeight)
-{
-    LOCK(cs);
-
-    if (nHeight == -1) {
-        nHeight = tipIndex->nHeight;
-    }
-    return Params().GetConsensus().DIP0003Enabled;
-    //return nHeight >= Params().GetConsensus().DIP0003EnforcementHeight;
-}
-
 void CDeterministicMNManager::CleanupCache(int nHeight)
 {
     AssertLockHeld(cs);
@@ -1085,45 +1056,8 @@ void CDeterministicMNManager::UpgradeDBIfNeeded()
     }
     evoDb.GetRawDB().Erase(std::string("b_b"));
 
-    if (Params().GetConsensus().DIP0003Enabled) {
-        // not reached DIP3 height yet, so no upgrade needed
-        auto dbTx = evoDb.BeginTransaction();
-        evoDb.WriteBestBlock(chainActive.Tip()->GetBlockHash());
-        dbTx->Commit();
-        return;
-    }
-
-    LogPrintf("CDeterministicMNManager::%s -- upgrading DB to use compact diffs\n", __func__);
-
-    CDBBatch batch(evoDb.GetRawDB());
-
-    CDeterministicMNList curMNList;
-    curMNList.SetHeight(1);
-    curMNList.SetBlockHash(chainActive[1]->GetBlockHash());
-
-    for (int nHeight = 1; nHeight <= chainActive.Height(); nHeight++) {
-        auto pindex = chainActive[nHeight];
-
-        CDeterministicMNList newMNList;
-        UpgradeDiff(batch, pindex, curMNList, newMNList);
-
-        if ((nHeight % SNAPSHOT_LIST_PERIOD) == 0) {
-            batch.Write(std::make_pair(DB_LIST_SNAPSHOT, pindex->GetBlockHash()), newMNList);
-            evoDb.GetRawDB().WriteBatch(batch);
-            batch.Clear();
-        }
-
-        curMNList = newMNList;
-    }
-
-    evoDb.GetRawDB().WriteBatch(batch);
-
-    LogPrintf("CDeterministicMNManager::%s -- done upgrading\n", __func__);
-
-    // Writing EVODB_BEST_BLOCK (which is b_b2 now) marks the DB as upgraded
     auto dbTx = evoDb.BeginTransaction();
     evoDb.WriteBestBlock(chainActive.Tip()->GetBlockHash());
     dbTx->Commit();
-
-    evoDb.GetRawDB().CompactFull();
+    return;
 }
