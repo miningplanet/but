@@ -820,17 +820,22 @@ bool CDeterministicMNManager::BuildNewListFromBlock(const CBlock& block, const C
                 assert(false); // this should have been handled already
             }
 
-            bool qpkValid = qc.commitment.quorumPublicKey.IsValid();
-            bool qvvcNull = qc.commitment.quorumVvecHash.IsNull();
-            bool msValid = qc.commitment.membersSig.IsValid();
-            bool qsValid = qc.commitment.quorumSig.IsValid();
-            int cSigners = qc.commitment.CountSigners();
-            int vMembers = qc.commitment.CountValidMembers();
-
             if (debugLogs) {
+                const int cSigners = qc.commitment.CountSigners();
                 LogPrintf("CDeterministicMNManager::%s -- Log commitment: %s, %s, %s, %s, %s, %s - %d,%d,%d,%d,%d,%d \n",
-                    __func__, tx.GetHash().ToString(), qc.commitment.quorumHash.ToString(), qc.commitment.quorumPublicKey.ToString(), qc.commitment.quorumVvecHash.ToString(), 
-                    qc.commitment.membersSig.ToString(), qc.commitment.quorumSig.ToString(), qpkValid, qvvcNull, msValid, qsValid, cSigners, vMembers);
+                    __func__, 
+                    tx.GetHash().ToString(), 
+                    qc.commitment.quorumHash.ToString(), 
+                    cSigners > 0 ? qc.commitment.quorumPublicKey.ToString() : "0",
+                    cSigners > 0 ? qc.commitment.quorumVvecHash.ToString() : "0", 
+                    cSigners > 0 ? qc.commitment.membersSig.ToString() : "0",
+                    cSigners > 0 ? qc.commitment.quorumSig.ToString() : "0", 
+                    qc.commitment.quorumPublicKey.IsValid(),
+                    qc.commitment.quorumVvecHash.IsNull(),
+                    qc.commitment.membersSig.IsValid(), 
+                    qc.commitment.quorumSig.IsValid(), 
+                    cSigners, 
+                    qc.commitment.CountValidMembers());
             }
 
             if (!qc.commitment.IsNull()) {
