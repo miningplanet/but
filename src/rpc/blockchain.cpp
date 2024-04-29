@@ -1511,10 +1511,13 @@ UniValue getblockchaininfo(const JSONRPCRequest& request)
     obj.push_back(Pair("verificationprogress",  GuessVerificationProgress(Params().TxData(), chainActive.Tip())));
     obj.push_back(Pair("chainwork",             chainActive.Tip()->nChainWork.GetHex()));
     CCoinsStats stats;
-    FlushStateToDisk();
-    if (GetUTXOStats(pcoinsdbview, stats)) {
-        obj.push_back(Pair("total_amount", ValueFromAmount(stats.nTotalAmount)));
-    }
+    // Posix Signal: Speicherzugriffsfehler
+    // (0x5590B30FBEEB) stl_vector.h:108    - std::_Vector_base<unsigned long, std::allocator<unsigned long> >::_Vector_impl_data::_M_copy_data(std::_Vector_base<unsigned long, std::allocator<unsigned long> >::_Vector_impl_data const&)
+    // at blockchain.cpp:1137 - GetUTXOStats
+    // FlushStateToDisk();
+    // if (GetUTXOStats(pcoinsdbview, stats)) {
+    //     obj.push_back(Pair("total_amount", ValueFromAmount(stats.nTotalAmount)));
+    // }
     obj.push_back(Pair("pruned",                fPruneMode));
 
     const Consensus::Params& consensusParams = Params().GetConsensus();
