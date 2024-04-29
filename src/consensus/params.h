@@ -176,7 +176,6 @@ struct Params {
     int64_t nMaxActualTimespan;
     int64_t nLocalTargetAdjustment;
     int64_t nLocalDifficultyAdjustment;
-    int nMaxCash;
 
     uint256 nMinimumChainWork;
     uint256 defaultAssumeValid;
