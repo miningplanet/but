@@ -220,11 +220,7 @@ static bool CompareByLastPaid(const CDeterministicMNCPtr& _a, const CDeterminist
 
 CDeterministicMNCPtr CDeterministicMNList::GetMNPayee() const
 {
-//	int nHeight = chainActive.Tip() == nullptr ? 0 : chainActive.Tip()->nHeight;
-//    if ((nHeight < 900 &&  mnMap.size() == 0)||(nHeight >= 900 && mnMap.size() <= 10)) {
-//        return nullptr;
-//    }
-	if(mnMap.size() <= 10) {
+	if(mnMap.size() <= 2) {
 		return nullptr;
 	}
 
@@ -240,15 +236,12 @@ CDeterministicMNCPtr CDeterministicMNList::GetMNPayee() const
 
 std::vector<CDeterministicMNCPtr> CDeterministicMNList::GetProjectedMNPayees(int nCount) const
 {
-	int validMnCount =  GetValidMNsCount();
-	if(validMnCount < 10) {
+	const size_t validMnCount =  GetValidMNsCount();
+	if (validMnCount < 2) {
 		nCount = 0;
 	} else if (nCount > validMnCount) {
         nCount = validMnCount;
     }
-//	if (nCount > validMnCount) {
-//		nCount = validMnCount;
-//	}
 
     std::vector<CDeterministicMNCPtr> result;
     result.reserve(nCount);
